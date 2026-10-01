@@ -19,6 +19,20 @@ export default function PromoBanners({ promotions = [] }: PromoBannersProps) {
     comfortPromo?.image_url ||
     'https://images.unsplash.com/photo-1544126592-807ade215a0b?q=80&w=1000&auto=format&fit=crop';
 
+  // Card 1: Shop Now goes to All Products (/shop)
+  const specialOffersLink =
+    specialOffersPromo?.button_link && specialOffersPromo.button_link !== '/shop?filter=offers'
+      ? specialOffersPromo.button_link
+      : '/shop';
+
+  // Card 2: Explore goes to Accessories (/category/accessories)
+  const comfortLink =
+    !comfortPromo?.button_link ||
+    comfortPromo.button_link === '/shop' ||
+    comfortPromo.button_link === '/category/dresses'
+      ? '/category/accessories'
+      : comfortPromo.button_link;
+
   return (
     <section className="px-4 sm:px-8 lg:px-12 py-5 sm:py-6 bg-white">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-stretch">
@@ -57,7 +71,7 @@ export default function PromoBanners({ promotions = [] }: PromoBannersProps) {
               {specialOffersPromo?.subtitle || 'For your little happiness'}
             </p>
             <Link
-              href={specialOffersPromo?.button_link || '/shop?filter=offers'}
+              href={specialOffersLink}
               className="inline-flex items-center gap-1.5 sm:gap-2 bg-[#FB7185] hover:bg-[#F43F5E] text-white font-semibold text-xs sm:text-xs py-2 sm:py-2.5 px-4 sm:px-6 rounded-full shadow-md shadow-pink-200/50 transition-all active:scale-[0.98]"
             >
               <span>{specialOffersPromo?.button_text || 'Shop Now'}</span>
@@ -107,7 +121,7 @@ export default function PromoBanners({ promotions = [] }: PromoBannersProps) {
               {comfortPromo?.tagline || comfortPromo?.subtitle || 'Ultra-soft daily wear essentials'}
             </p>
             <Link
-              href={comfortPromo?.button_link || '/category/dresses'}
+              href={comfortLink}
               className="inline-flex items-center gap-1.5 sm:gap-2 bg-[#0284C7] hover:bg-[#0369A1] text-white font-semibold text-xs sm:text-xs py-2 sm:py-2.5 px-4 sm:px-6 rounded-full shadow-md shadow-sky-200/50 transition-all active:scale-[0.98]"
             >
               <span>{comfortPromo?.button_text || 'Explore'}</span>

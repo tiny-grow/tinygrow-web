@@ -8,8 +8,10 @@ import {
   getContactInformation,
   getSocialLinks,
 } from '@/lib/supabase/queries';
+import { searchAndRankProducts } from '@/lib/searchUtils';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { X, Search } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -23,7 +25,8 @@ interface ShopPageProps {
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const resolvedParams = await searchParams;
-  const query = resolvedParams.q?.toLowerCase() || '';
+  const rawQuery = resolvedParams.q || '';
+  const query = rawQuery.trim().toLowerCase();
   const filter = resolvedParams.filter || '';
   const selectedCategory = resolvedParams.category || '';
 
@@ -41,17 +44,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   // Apply filters
   let filteredProducts = allProducts;
 
+  // Apply fuzzy spelling-tolerant search
   if (query) {
-    filteredProducts = filteredProducts.filter(
-      (p) =>
-        p.name.toLowerCase().includes(query) ||
-        p.description?.toLowerCase().includes(query)
-    );
+    filteredProducts = searchAndRankProducts(filteredProducts, query);
   }
 
   if (selectedCategory) {
     filteredProducts = filteredProducts.filter(
-      (p) => p.categories?.slug === selectedCategory
+      (p) => (p.categories as any)?.slug === selectedCategory || (p as any).category_id === selectedCategory
     );
   }
 
@@ -76,19 +76,31 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             <div className="border-b border-slate-100 pb-5 sm:pb-6 mb-6 sm:mb-8">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
-                    {filter === 'new'
-                      ? 'New Arrivals'
-                      : filter === 'toys'
-                      ? 'Baby Toys'
-                      : filter === 'accessories'
-                      ? 'Baby Accessories'
-                      : filter === 'offers'
-                      ? 'Special Offers'
-                      : query
-                      ? `Search Results for "${query}"`
-                      : 'All Products'}
-                  </h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
+                      {filter === 'new'
+                        ? 'New Arrivals'
+                        : filter === 'toys'
+                        ? 'Baby Toys'
+                        : filter === 'accessories'
+                        ? 'Baby Accessories'
+                        : filter === 'offers'
+                        ? 'Special Offers'
+                        : rawQuery
+                        ? `Search: "${rawQuery}"`
+                        : 'All Products'}
+                    </h1>
+                    {rawQuery && (
+                      <Link
+                        href="/shop"
+                        className="inline-flex items-center gap-1 text-xs font-semibold bg-pink-50 text-[#FB7185] hover:bg-pink-100 px-2.5 py-1 rounded-full transition-colors ml-1"
+                        title="Clear search"
+                      >
+                        <span>Clear</span>
+                        <X className="w-3 h-3" />
+                      </Link>
+                    )}
+                  </div>
                   <p className="text-xs sm:text-sm text-slate-500 mt-1">
                     Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
                   </p>
@@ -114,7 +126,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    💎 Accessories
+                    Accessories
                   </Link>
                   <Link
                     href="/shop?filter=toys"
@@ -124,7 +136,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    🧸 Toys
+                    Toys
                   </Link>
                   {categories.map((cat) => (
                     <Link

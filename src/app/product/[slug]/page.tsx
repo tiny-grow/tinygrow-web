@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ShoppingBag } from 'lucide-react';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -124,7 +124,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center text-slate-400 p-6 text-center">
-                    <span className="text-6xl mb-2">🧸</span>
+                    <ShoppingBag className="w-12 h-12 text-slate-300 mb-2 stroke-[1.5]" />
                     <span className="text-sm font-medium">{product.name}</span>
                   </div>
                 )}

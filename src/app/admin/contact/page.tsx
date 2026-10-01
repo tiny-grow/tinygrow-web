@@ -17,7 +17,7 @@ export default function AdminContactPage() {
   const [email, setEmail] = useState('support@tinygrow.com');
   const [address, setAddress] = useState('123 Baby Blossom Lane, Care City');
   const [businessHours, setBusinessHours] = useState('Mon - Sat, 9AM - 6PM');
-  const [announcementText, setAnnouncementText] = useState('Free shipping on orders above ₹999 | Easy returns | Safe & secure payment');
+  const [announcementText, setAnnouncementText] = useState('Free Delivery Across India | Easy WhatsApp Ordering | 100% Baby-Safe Products');
 
   useEffect(() => {
     const fetchContact = async () => {
@@ -45,7 +45,7 @@ export default function AdminContactPage() {
           setEmail(c.email || 'support@tinygrow.com');
           setAddress(c.address || '');
           setBusinessHours(c.business_hours || 'Mon - Sat, 9AM - 6PM');
-          setAnnouncementText(c.announcement_text || 'Free shipping on orders above ₹999 | Easy returns | Safe & secure payment');
+          setAnnouncementText(c.announcement_text || 'Free Delivery Across India | Easy WhatsApp Ordering | 100% Baby-Safe Products');
         }
       } catch (err: unknown) {
         setErrorMsg(err instanceof Error ? err.message : 'Error fetching contact settings');
@@ -223,7 +223,7 @@ export default function AdminContactPage() {
                   type="text"
                   value={announcementText}
                   onChange={(e) => setAnnouncementText(e.target.value)}
-                  placeholder="Free shipping on orders above ₹999 | Easy returns | Safe & secure payment"
+                  placeholder="Free Delivery Across India | Easy WhatsApp Ordering | 100% Baby-Safe Products"
                   className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 pl-9 border border-slate-200 focus:outline-none focus:border-[#38BDF8]"
                 />
                 <Megaphone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />

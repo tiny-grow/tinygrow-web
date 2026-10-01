@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Edit2, Trash2, Check, AlertCircle, Loader2, Search, X, Layers, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Plus, Edit2, Trash2, Check, AlertCircle, Loader2, Search, X, Layers, Eye, EyeOff, ExternalLink, ShoppingBag, ToyBrick, Tag } from 'lucide-react';
 import { Category } from '@/lib/supabase/types';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import ImageUploader from '@/components/admin/ImageUploader';
@@ -211,7 +211,7 @@ export default function AdminCategoriesPage() {
             className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0284C7] bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3.5 py-2.5 rounded-xl transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-            <span>View Storefront ↗</span>
+            <span>View Storefront</span>
           </Link>
           <button
             type="button"
@@ -326,13 +326,15 @@ export default function AdminCategoriesPage() {
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center gap-1.5 p-4 text-center">
-                      <span className="text-4xl transition-transform duration-300 group-hover:scale-110">
-                        {c.slug.includes('dress') || c.name.toLowerCase().includes('dress')
-                          ? '👗'
-                          : c.slug.includes('toy') || c.name.toLowerCase().includes('toy')
-                          ? '🧸'
-                          : '🍼'}
-                      </span>
+                      <div className="w-12 h-12 rounded-xl bg-white/90 shadow-2xs flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                        {c.slug.includes('dress') || c.name.toLowerCase().includes('dress') ? (
+                          <ShoppingBag className="w-6 h-6 text-[#FB7185]" />
+                        ) : c.slug.includes('toy') || c.name.toLowerCase().includes('toy') ? (
+                          <ToyBrick className="w-6 h-6 text-emerald-500" />
+                        ) : (
+                          <Tag className="w-6 h-6 text-violet-500" />
+                        )}
+                      </div>
                       <span className="text-[11px] font-bold text-slate-600">
                         {c.name}
                       </span>

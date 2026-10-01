@@ -13,8 +13,13 @@ import {
   Leaf,
   ArrowRight,
   MessageCircle,
+  ShoppingBag,
+  Sparkles,
+  Tag,
+  Layers,
 } from 'lucide-react';
 import { Product, ContactInformation } from '@/lib/supabase/types';
+import { matchesSearchSpelling } from '@/lib/searchUtils';
 
 interface DressesCatalogProps {
   initialProducts?: Product[];
@@ -22,12 +27,12 @@ interface DressesCatalogProps {
 }
 
 const CATEGORIES = [
-  { label: 'All Dresses', icon: '👗', bg: 'bg-[#FFF0F2]', border: 'border-[#FB7185]' },
-  { label: 'Casual Dresses', icon: '👗', bg: 'bg-[#F0F7FD]', border: 'border-sky-100' },
-  { label: 'Party Wear', icon: '✨', bg: 'bg-[#FEF9E7]', border: 'border-amber-100' },
-  { label: 'Romper Dresses', icon: '👶', bg: 'bg-[#EFFBF9]', border: 'border-teal-100' },
-  { label: 'Traditional Wear', icon: '🥻', bg: 'bg-[#FDEDEC]', border: 'border-rose-100' },
-  { label: 'Frock Dresses', icon: '🎀', bg: 'bg-[#FDF2F4]', border: 'border-pink-100' },
+  { label: 'All Dresses', icon: ShoppingBag, bg: 'bg-[#FFF0F2]', border: 'border-[#FB7185]', iconColor: 'text-[#FB7185]' },
+  { label: 'Casual Dresses', icon: Layers, bg: 'bg-[#F0F7FD]', border: 'border-sky-100', iconColor: 'text-sky-500' },
+  { label: 'Party Wear', icon: Sparkles, bg: 'bg-[#FEF9E7]', border: 'border-amber-100', iconColor: 'text-amber-500' },
+  { label: 'Romper Dresses', icon: Heart, bg: 'bg-[#EFFBF9]', border: 'border-teal-100', iconColor: 'text-teal-500' },
+  { label: 'Traditional Wear', icon: Tag, bg: 'bg-[#FDEDEC]', border: 'border-rose-100', iconColor: 'text-rose-500' },
+  { label: 'Frock Dresses', icon: ShoppingBag, bg: 'bg-[#FDF2F4]', border: 'border-pink-100', iconColor: 'text-pink-500' },
 ];
 
 const SIZES = [
@@ -65,13 +70,9 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
   // Only use real products passed from the database! NO mock products!
   const filteredProducts = useMemo(() => {
     return initialProducts.filter((product) => {
-      // 1. Search Query filter
+      // 1. Search Query filter (with spelling & typo tolerance)
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesName = product.name?.toLowerCase().includes(q);
-        const matchesDesc = product.description?.toLowerCase().includes(q);
-        const matchesCat = product.categories?.name?.toLowerCase().includes(q);
-        if (!matchesName && !matchesDesc && !matchesCat) return false;
+        if (!matchesSearchSpelling(product, searchQuery)) return false;
       }
 
       // 2. Category filter
@@ -122,27 +123,6 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
     setWishlist((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleWhatsAppOrder = (product: Product) => {
-    const cleanNumber = whatsappPhone.replace(/\D/g, '');
-    const priceText = Number(product.price).toLocaleString('en-IN');
-    const productUrl = typeof window !== 'undefined'
-      ? `${window.location.origin}/product/${product.slug}`
-      : `https://tinygrow.com/product/${product.slug}`;
-
-    const formattedMessage = `🛍 *NEW ORDER - TINYGROW*
---------------------------------
-👶 *Product:* ${product.name}
-💰 *Price:* ₹${priceText}
-📦 *Quantity:* 1
---------------------------------
-🔗 *Product Link:*
-${productUrl}
---------------------------------
-✨ *Please confirm availability and order details. Thank you!*`;
-
-    window.open(`https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodeURIComponent(formattedMessage)}`, '_blank');
-  };
-
   const resetFilters = () => {
     setSelectedCategory('All Dresses');
     setSelectedSizes([]);
@@ -190,8 +170,8 @@ ${productUrl}
                   : `${cat.border} ${cat.bg} hover:border-slate-300`
               }`}
             >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg bg-white/70 shadow-2xs">
-                {cat.icon}
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/70 shadow-2xs">
+                <cat.icon className={`w-4 h-4 ${cat.iconColor}`} />
               </div>
               <span
                 className={`text-xs font-bold leading-tight ${
@@ -374,8 +354,8 @@ ${productUrl}
                           className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-3xl text-pink-200 bg-pink-50">
-                          👗
+                        <div className="w-full h-full flex items-center justify-center text-pink-300 bg-pink-50">
+                          <ShoppingBag className="w-8 h-8 stroke-[1.5]" />
                         </div>
                       )}
 

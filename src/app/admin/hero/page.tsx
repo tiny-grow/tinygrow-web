@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Save, AlertCircle, Check, Loader2, ExternalLink } from 'lucide-react';
+import { Save, AlertCircle, Check, Loader2, ExternalLink, Monitor, Smartphone, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { HeroBanner } from '@/lib/supabase/types';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import ImageUploader from '@/components/admin/ImageUploader';
@@ -229,7 +229,7 @@ export default function AdminHeroPage() {
           className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0284C7] bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3.5 py-2 rounded-xl transition-colors w-fit"
         >
           <ExternalLink className="w-3.5 h-3.5" />
-          <span>View Homepage ↗</span>
+          <span>View Homepage</span>
         </Link>
       </div>
 
@@ -354,7 +354,7 @@ export default function AdminHeroPage() {
                 <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-base">🖥️</span>
+                      <Monitor className="w-4 h-4 text-sky-600" />
                       <h2 className="text-sm font-extrabold text-[#0F172A] tracking-tight">
                         Desktop Hero Banner
                       </h2>
@@ -386,7 +386,7 @@ export default function AdminHeroPage() {
                 <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-base">📱</span>
+                      <Smartphone className="w-4 h-4 text-pink-500" />
                       <h2 className="text-sm font-extrabold text-[#0F172A] tracking-tight">
                         Mobile View Banners
                       </h2>
@@ -525,11 +525,19 @@ export default function AdminHeroPage() {
                 <label htmlFor="heroActive" className="text-xs font-bold text-slate-800 cursor-pointer block">
                   Show Hero Banner on Storefront
                 </label>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  {active
-                    ? '✅ Banner is visible to visitors on your homepage.'
-                    : '⚠️ Banner is hidden — check this box to show it on your homepage.'}
-                </p>
+                <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5">
+                  {active ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Banner is visible to visitors on your homepage.</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      <span>Banner is hidden — check this box to show it on your homepage.</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
