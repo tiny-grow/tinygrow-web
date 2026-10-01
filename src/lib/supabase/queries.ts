@@ -35,6 +35,7 @@ export async function getProducts(options?: {
   isNewArrival?: boolean;
   isToy?: boolean;
   isAccessory?: boolean;
+  isDress?: boolean;
   categorySlug?: string;
   limit?: number;
 }): Promise<Product[]> {
@@ -52,36 +53,31 @@ export async function getProducts(options?: {
     if (options?.isNewArrival) {
       query = query.eq('is_new_arrival', true);
     }
-    if (options?.isToy) {
+    if (options?.isToy || options?.categorySlug === 'toys') {
       query = query.eq('is_toy', true);
-    }
-    if (options?.isAccessory) {
+    } else if (options?.isAccessory || options?.categorySlug === 'accessories') {
       query = query.eq('is_accessory', true);
-    }
-    if (options?.categorySlug) {
-      if (options.categorySlug === 'toys') {
-        query = query.eq('is_toy', true);
-      } else if (options.categorySlug === 'accessories') {
-        query = query.eq('is_accessory', true);
-      } else {
-        let { data: cat } = await supabase
+    } else if (options?.isDress || options?.categorySlug === 'dresses' || options?.categorySlug === 'clothing') {
+      // Dresses are all clothing products that are not toys and not accessories
+      query = query.eq('is_toy', false).eq('is_accessory', false);
+    } else if (options?.categorySlug) {
+      let { data: cat } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('slug', options.categorySlug)
+        .maybeSingle();
+
+      if (!cat) {
+        const { data: catByName } = await supabase
           .from('categories')
           .select('id')
-          .eq('slug', options.categorySlug)
+          .ilike('name', `%${options.categorySlug}%`)
           .maybeSingle();
+        cat = catByName;
+      }
 
-        if (!cat) {
-          const { data: catByName } = await supabase
-            .from('categories')
-            .select('id')
-            .ilike('name', `%${options.categorySlug}%`)
-            .maybeSingle();
-          cat = catByName;
-        }
-
-        if (cat) {
-          query = query.eq('category_id', cat.id);
-        }
+      if (cat) {
+        query = query.eq('category_id', cat.id);
       }
     }
     if (options?.limit) {
@@ -99,8 +95,13 @@ export async function getProducts(options?: {
         .order('created_at', { ascending: false });
       if (options?.featured) fallbackQuery = fallbackQuery.eq('featured', true);
       if (options?.isNewArrival) fallbackQuery = fallbackQuery.eq('is_new_arrival', true);
-      if (options?.isToy) fallbackQuery = fallbackQuery.eq('is_toy', true);
-      if (options?.isAccessory) fallbackQuery = fallbackQuery.eq('is_accessory', true);
+      if (options?.isToy || options?.categorySlug === 'toys') {
+        fallbackQuery = fallbackQuery.eq('is_toy', true);
+      } else if (options?.isAccessory || options?.categorySlug === 'accessories') {
+        fallbackQuery = fallbackQuery.eq('is_accessory', true);
+      } else if (options?.isDress || options?.categorySlug === 'dresses' || options?.categorySlug === 'clothing') {
+        fallbackQuery = fallbackQuery.eq('is_toy', false).eq('is_accessory', false);
+      }
       if (options?.limit) fallbackQuery = fallbackQuery.limit(options.limit);
       const fallbackRes = await fallbackQuery;
       data = fallbackRes.data;
@@ -108,7 +109,20 @@ export async function getProducts(options?: {
     }
 
     if (error || !data) return [];
-    return data as Product[];
+    return (data as Product[]).map((p) => {
+      let mrp = p.mrp ? Number(p.mrp) : null;
+      if (!mrp && p.description && p.description.includes('[MRP:')) {
+        const match = p.description.match(/\[MRP:\s*([0-9.]+)\]/);
+        if (match && match[1]) {
+          mrp = Number(match[1]);
+        }
+      }
+      return {
+        ...p,
+        price: Number(p.price) || 0,
+        mrp: mrp && !isNaN(mrp) ? mrp : null,
+      };
+    });
   } catch (err) {
     console.error('Error fetching products:', err);
     return [];
@@ -126,11 +140,66 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
       .maybeSingle();
 
     if (error || !data) return null;
-    return data as Product;
+    const p = data as Product;
+    let mrp = p.mrp ? Number(p.mrp) : null;
+    if (!mrp && p.description && p.description.includes('[MRP:')) {
+      const match = p.description.match(/\[MRP:\s*([0-9.]+)\]/);
+      if (match && match[1]) {
+        mrp = Number(match[1]);
+      }
+    }
+    return {
+      ...p,
+      price: Number(p.price) || 0,
+      mrp: mrp && !isNaN(mrp) ? mrp : null,
+    };
   } catch (err) {
     console.error('Error fetching product by slug:', err);
     return null;
   }
+}
+
+export function normalizeHeroBanner(banner: HeroBanner | null): HeroBanner | null {
+  if (!banner) return null;
+
+  let desktopUrls: string[] = [];
+  let mobileUrls: string[] = [];
+
+  // 1. Check if description has JSON payload containing banners
+  if (banner.description && banner.description.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(banner.description);
+      if (Array.isArray(parsed.desktop_banners)) {
+        desktopUrls = parsed.desktop_banners.filter(Boolean);
+      }
+      if (Array.isArray(parsed.mobile_banners)) {
+        mobileUrls = parsed.mobile_banners.filter(Boolean);
+      }
+    } catch {
+      // not JSON
+    }
+  }
+
+  // 2. Check native columns if present
+  if (Array.isArray(banner.desktop_banner_urls) && banner.desktop_banner_urls.length > 0) {
+    desktopUrls = banner.desktop_banner_urls.filter(Boolean);
+  } else if (desktopUrls.length === 0 && banner.image_url) {
+    desktopUrls = [banner.image_url];
+  }
+
+  if (Array.isArray(banner.mobile_banner_urls) && banner.mobile_banner_urls.length > 0) {
+    mobileUrls = banner.mobile_banner_urls.filter(Boolean);
+  } else if (mobileUrls.length === 0 && banner.mobile_image_url) {
+    mobileUrls = [banner.mobile_image_url];
+  }
+
+  return {
+    ...banner,
+    desktop_banner_urls: desktopUrls.slice(0, 2),
+    mobile_banner_urls: mobileUrls.slice(0, 2),
+    image_url: desktopUrls[0] || banner.image_url || null,
+    mobile_image_url: mobileUrls[0] || banner.mobile_image_url || null,
+  };
 }
 
 export async function getHeroBanner(): Promise<HeroBanner | null> {
@@ -147,7 +216,7 @@ export async function getHeroBanner(): Promise<HeroBanner | null> {
       .maybeSingle();
 
     if (error || !data) return null;
-    return data as HeroBanner;
+    return normalizeHeroBanner(data as HeroBanner);
   } catch (err) {
     console.error('Error fetching hero banner:', err);
     return null;

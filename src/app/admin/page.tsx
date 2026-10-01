@@ -45,13 +45,14 @@ export default async function AdminDashboardPage() {
     getSocialLinks(),
   ]);
 
+  const dressProducts = products.filter((p) => !p.is_toy && !p.is_accessory);
   const toyProducts = products.filter((p) => p.is_toy);
   const accessoryProducts = products.filter((p) => p.is_accessory);
   const newArrivals = products.filter((p) => p.is_new_arrival);
   const inStockProducts = products.filter((p) => p.stock_status === 'in_stock');
 
   const stats = [
-    { label: 'Total Products', count: products.length, icon: ShoppingBag, gradient: 'from-pink-500 to-rose-500', href: '/admin/products' },
+    { label: 'Total Dresses', count: dressProducts.length, icon: ShoppingBag, gradient: 'from-pink-500 to-rose-500', href: '/admin/products' },
     { label: 'Categories', count: categories.length, icon: Layers, gradient: 'from-purple-500 to-violet-500', href: '/admin/categories' },
     { label: 'Toys', count: toyProducts.length, icon: ToyBrick, gradient: 'from-emerald-500 to-teal-500', href: '/admin/toys' },
     { label: 'Accessories', count: accessoryProducts.length, icon: Tag, gradient: 'from-violet-500 to-purple-500', href: '/admin/accessories' },
@@ -60,7 +61,7 @@ export default async function AdminDashboardPage() {
   ];
 
   const quickActions = [
-    { label: 'Add Product', href: '/admin/products', icon: ShoppingBag, iconColor: 'text-pink-500', desc: 'Clothes & general items', color: 'hover:border-pink-300 hover:bg-pink-50/50' },
+    { label: 'Add Dress', href: '/admin/products', icon: ShoppingBag, iconColor: 'text-pink-500', desc: 'Frocks, onesies & clothes', color: 'hover:border-pink-300 hover:bg-pink-50/50' },
     { label: 'Add Toys', href: '/admin/toys', icon: ToyBrick, iconColor: 'text-emerald-500', desc: 'Montessori & soft toys', color: 'hover:border-emerald-300 hover:bg-emerald-50/50' },
     { label: 'Add Accessories', href: '/admin/accessories', icon: Tag, iconColor: 'text-violet-500', desc: 'Bibs, caps, socks & mittens', color: 'hover:border-violet-300 hover:bg-violet-50/50' },
     { label: 'Add Category', href: '/admin/categories', icon: Layers, iconColor: 'text-purple-500', desc: 'Organize your products', color: 'hover:border-purple-300 hover:bg-purple-50/50' },

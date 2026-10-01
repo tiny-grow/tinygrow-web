@@ -39,6 +39,7 @@ create table if not exists public.products (
   slug text not null unique,
   description text,
   price numeric(10,2) not null default 0,
+  mrp numeric(10,2),
   image_url text,
   suitable_ages text[] default '{}',
   stock_status text default 'in_stock' check (stock_status in ('in_stock', 'out_of_stock', 'low_stock')),
@@ -50,8 +51,9 @@ create table if not exists public.products (
   updated_at timestamptz default timezone('utc'::text, now()) not null
 );
 
--- Add is_accessory column to existing databases (safe to run multiple times)
+-- Add missing columns to existing databases (safe to run multiple times)
 alter table public.products add column if not exists is_accessory boolean default false;
+alter table public.products add column if not exists mrp numeric(10,2);
 
 -- Hero Banner Table
 create table if not exists public.hero_banner (
@@ -68,6 +70,7 @@ create table if not exists public.hero_banner (
   feature_2_title text default 'Gentle on Baby''s Skin',
   feature_3_title text default 'Fast & Reliable Delivery',
   feature_4_title text default 'Trusted by Parents',
+  desktop_banner_urls text[] default '{}',
   mobile_image_url text,
   mobile_banner_urls text[] default '{}',
   active boolean default true,
@@ -75,7 +78,8 @@ create table if not exists public.hero_banner (
   updated_at timestamptz default timezone('utc'::text, now()) not null
 );
 
--- Add mobile banner columns to existing hero_banner table (safe to run multiple times)
+-- Add banner slider columns to existing hero_banner table (safe to run multiple times)
+alter table public.hero_banner add column if not exists desktop_banner_urls text[] default '{}';
 alter table public.hero_banner add column if not exists mobile_image_url text;
 alter table public.hero_banner add column if not exists mobile_banner_urls text[] default '{}';
 

@@ -57,6 +57,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   if (filter === 'new') {
     filteredProducts = filteredProducts.filter((p) => p.is_new_arrival);
+  } else if (filter === 'dresses') {
+    filteredProducts = filteredProducts.filter((p) => !p.is_toy && !p.is_accessory);
   } else if (filter === 'toys') {
     filteredProducts = filteredProducts.filter((p) => p.is_toy);
   } else if (filter === 'accessories') {
@@ -80,6 +82,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
                       {filter === 'new'
                         ? 'New Arrivals'
+                        : filter === 'dresses'
+                        ? 'Baby Dresses'
                         : filter === 'toys'
                         ? 'Baby Toys'
                         : filter === 'accessories'
@@ -119,6 +123,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                     All
                   </Link>
                   <Link
+                    href="/category/dresses"
+                    className="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors shrink-0 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  >
+                    Dresses
+                  </Link>
+                  <Link
                     href="/shop?filter=accessories"
                     className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors shrink-0 ${
                       filter === 'accessories'
@@ -138,19 +148,28 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                   >
                     Toys
                   </Link>
-                  {categories.map((cat) => (
-                    <Link
-                      key={cat.id}
-                      href={`/shop?category=${cat.slug}`}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors shrink-0 ${
-                        selectedCategory === cat.slug
-                          ? 'bg-[#FB7185] text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {cat.name}
-                    </Link>
-                  ))}
+                  {categories
+                    .filter((cat) => {
+                      const name = (cat.name || '').toLowerCase();
+                      const slug = (cat.slug || '').toLowerCase();
+                      if (name.includes('accessor') || slug.includes('accessor')) return false;
+                      if (name.includes('toy') || slug.includes('toy')) return false;
+                      if (name.includes('dress') || slug.includes('dress') || slug === 'clothing' || name.includes('traditional')) return false;
+                      return true;
+                    })
+                    .map((cat) => (
+                      <Link
+                        key={cat.id}
+                        href={`/shop?category=${cat.slug}`}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors shrink-0 ${
+                          selectedCategory === cat.slug
+                            ? 'bg-[#FB7185] text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
                 </div>
               </div>
             </div>

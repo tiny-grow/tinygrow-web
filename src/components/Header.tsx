@@ -12,7 +12,7 @@ const navLinks = [
   { label: 'Toys', href: '/category/toys' },
   { label: 'New Arrivals', href: '/new-arrivals' },
   { label: 'All Products', href: '/shop' },
-  { label: 'Offers', href: '/shop?filter=offers' },
+  // { label: 'Offers', href: '/shop?filter=offers' }, // hidden for now
 ];
 
 function checkIsActive(linkHref: string, pathname: string | null, currentFilter: string | null) {

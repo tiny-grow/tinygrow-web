@@ -26,13 +26,15 @@ interface DressesCatalogProps {
   contact?: ContactInformation | null;
 }
 
-const CATEGORIES = [
-  { label: 'All Dresses', icon: ShoppingBag, bg: 'bg-[#FFF0F2]', border: 'border-[#FB7185]', iconColor: 'text-[#FB7185]' },
-  { label: 'Casual Dresses', icon: Layers, bg: 'bg-[#F0F7FD]', border: 'border-sky-100', iconColor: 'text-sky-500' },
-  { label: 'Party Wear', icon: Sparkles, bg: 'bg-[#FEF9E7]', border: 'border-amber-100', iconColor: 'text-amber-500' },
-  { label: 'Romper Dresses', icon: Heart, bg: 'bg-[#EFFBF9]', border: 'border-teal-100', iconColor: 'text-teal-500' },
-  { label: 'Traditional Wear', icon: Tag, bg: 'bg-[#FDEDEC]', border: 'border-rose-100', iconColor: 'text-rose-500' },
-  { label: 'Frock Dresses', icon: ShoppingBag, bg: 'bg-[#FDF2F4]', border: 'border-pink-100', iconColor: 'text-pink-500' },
+const CAT_STYLE_PALETTE = [
+  { bg: 'bg-[#FFF0F2]', border: 'border-[#FB7185]', iconColor: 'text-[#FB7185]', icon: ShoppingBag },
+  { bg: 'bg-[#F0F7FD]', border: 'border-sky-100', iconColor: 'text-sky-500', icon: Layers },
+  { bg: 'bg-[#FEF9E7]', border: 'border-amber-100', iconColor: 'text-amber-500', icon: Sparkles },
+  { bg: 'bg-[#EFFBF9]', border: 'border-teal-100', iconColor: 'text-teal-500', icon: Heart },
+  { bg: 'bg-[#FDEDEC]', border: 'border-rose-100', iconColor: 'text-rose-500', icon: Tag },
+  { bg: 'bg-[#FDF2F4]', border: 'border-pink-100', iconColor: 'text-pink-500', icon: ShoppingBag },
+  { bg: 'bg-[#F3F0FD]', border: 'border-violet-100', iconColor: 'text-violet-500', icon: Sparkles },
+  { bg: 'bg-[#ECFDF5]', border: 'border-emerald-100', iconColor: 'text-emerald-500', icon: Leaf },
 ];
 
 const SIZES = [
@@ -44,23 +46,110 @@ const SIZES = [
   '4 - 5 Years',
 ];
 
+const STANDARD_CATEGORIES = [
+  'Casual Dresses',
+  'Traditional Wear',
+  'Party Wear',
+  'Romper Dresses',
+  'Frock Dresses',
+];
+
 export default function DressesCatalog({ initialProducts = [], contact }: DressesCatalogProps) {
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get('q') || '';
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All Dresses');
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [maxPrice, setMaxPrice] = useState<number>(2000);
+  const maxAvailablePrice = useMemo(() => {
+    const prices = initialProducts.map((p) => Number(p.price) || 0);
+    return Math.max(5000, ...prices);
+  }, [initialProducts]);
+  const [maxPrice, setMaxPrice] = useState<number>(10000);
   const [sortBy, setSortBy] = useState<string>('latest');
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState<string>(urlQuery);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Build categories list for dresses (only dress types, no toys/accessories/baby dresses/duplicates)
+  const allCategories = useMemo(() => {
+    const seen = new Set<string>();
+    const list: { label: string; style: typeof CAT_STYLE_PALETTE[0] }[] = [];
+
+    // Predefined standard dress categories
+    STANDARD_CATEGORIES.forEach((name) => {
+      seen.add(name.toLowerCase());
+      list.push({
+        label: name,
+        style: CAT_STYLE_PALETTE[list.length % CAT_STYLE_PALETTE.length],
+      });
+    });
+
+    const EXCLUDED = [
+      'traditional',
+      'traditional dresses',
+      'traditional wear',
+      'joyful toys',
+      'toys',
+      'toy',
+      'accessories',
+      'accessory',
+      'baby dresses',
+      'dresses',
+      'all dresses',
+      'clothing',
+    ];
+
+    // Only allow genuinely new custom dress categories
+    initialProducts.forEach((p) => {
+      const catName = p.categories?.name?.trim();
+      if (catName) {
+        const lower = catName.toLowerCase();
+        const isExcluded = EXCLUDED.some(
+          (exc) => lower === exc || lower.includes('toy') || lower.includes('accessor')
+        );
+        if (!seen.has(lower) && !isExcluded) {
+          seen.add(lower);
+          list.push({
+            label: catName,
+            style: CAT_STYLE_PALETTE[list.length % CAT_STYLE_PALETTE.length],
+          });
+        }
+      }
+
+      // Check style tag from description: [STYLE: ...]
+      if (p.description) {
+        const match = p.description.match(/\[STYLE:\s*([^\]]+)\]/i);
+        if (match && match[1]) {
+          const styleName = match[1].trim();
+          const lower = styleName.toLowerCase();
+          const isExcluded = EXCLUDED.some(
+            (exc) => lower === exc || lower.includes('toy') || lower.includes('accessor')
+          );
+          if (!seen.has(lower) && !isExcluded) {
+            seen.add(lower);
+            list.push({
+              label: styleName,
+              style: CAT_STYLE_PALETTE[list.length % CAT_STYLE_PALETTE.length],
+            });
+          }
+        }
+      }
+    });
+
+    return list;
+  }, [initialProducts]);
 
   useEffect(() => {
     if (urlQuery !== undefined) {
       setSearchQuery(urlQuery);
     }
   }, [urlQuery]);
+
+  useEffect(() => {
+    if (maxAvailablePrice > 5000) {
+      setMaxPrice(maxAvailablePrice);
+    }
+  }, [maxAvailablePrice]);
 
   const whatsappPhone =
     contact?.whatsapp_number && !contact.whatsapp_number.includes('98765')
@@ -75,15 +164,55 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
         if (!matchesSearchSpelling(product, searchQuery)) return false;
       }
 
-      // 2. Category filter
+      // 2. Category filter — matches category name, style tag, or dress type keywords
       if (selectedCategory !== 'All Dresses') {
-        const catName = product.categories?.name?.toLowerCase() || '';
-        const selectedCat = selectedCategory.toLowerCase();
-        const matchesCat =
-          catName.includes(selectedCat.replace(' dresses', '')) ||
-          catName === selectedCat ||
-          product.name?.toLowerCase().includes(selectedCat.replace(' dresses', ''));
-        if (!matchesCat) return false;
+        const catName = (product.categories?.name || '').toLowerCase().trim();
+        const sel = selectedCategory.toLowerCase().trim();
+        const name = (product.name || '').toLowerCase();
+
+        let productStyle = '';
+        if (product.description) {
+          const match = product.description.match(/\[STYLE:\s*([^\]]+)\]/i);
+          if (match && match[1]) {
+            productStyle = match[1].toLowerCase().trim();
+          }
+        }
+
+        const isExactCategory = catName === sel;
+        const isStyleMatch = productStyle === sel;
+
+        let isKeywordMatch = false;
+        if (sel.includes('traditional')) {
+          isKeywordMatch =
+            catName.includes('traditional') ||
+            productStyle.includes('traditional') ||
+            name.includes('traditional') ||
+            name.includes('kasavu');
+        } else if (sel.includes('casual')) {
+          isKeywordMatch =
+            catName.includes('casual') ||
+            productStyle.includes('casual') ||
+            name.includes('casual');
+        } else if (sel.includes('party')) {
+          isKeywordMatch =
+            catName.includes('party') ||
+            productStyle.includes('party') ||
+            name.includes('party');
+        } else if (sel.includes('romper')) {
+          isKeywordMatch =
+            catName.includes('romper') ||
+            productStyle.includes('romper') ||
+            name.includes('romper');
+        } else if (sel.includes('frock')) {
+          isKeywordMatch =
+            catName.includes('frock') ||
+            productStyle.includes('frock') ||
+            name.includes('frock');
+        }
+
+        if (!isExactCategory && !isStyleMatch && !isKeywordMatch) {
+          return false;
+        }
       }
 
       // 3. Size / Age filter
@@ -155,30 +284,53 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
         </span>
       </div>
 
-      {/* ── Horizontal Category Style Pills Bar ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-        {CATEGORIES.map((cat) => {
-          const isActive = selectedCategory === cat.label;
+      {/* ── Horizontal Category Tabs — Symmetric 2-col on mobile, flex on desktop ── */}
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2.5 sm:gap-3 mb-8">
+        {/* All Dresses tab always first */}
+        {(() => {
+          const allStyle = CAT_STYLE_PALETTE[0];
+          const AllIcon = allStyle.icon;
+          const isActive = selectedCategory === 'All Dresses';
           return (
             <button
-              key={cat.label}
+              key="all"
               type="button"
-              onClick={() => setSelectedCategory(cat.label)}
-              className={`flex items-center gap-2.5 p-3 rounded-2xl border transition-all text-left ${
+              onClick={() => setSelectedCategory('All Dresses')}
+              className={`flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2.5 rounded-2xl border transition-all text-left w-full sm:w-auto ${
                 isActive
                   ? 'border-[#FB7185] bg-[#FFF0F2] ring-2 ring-pink-200/50 shadow-xs'
-                  : `${cat.border} ${cat.bg} hover:border-slate-300`
+                  : `${allStyle.border} ${allStyle.bg} hover:border-slate-300`
               }`}
             >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/70 shadow-2xs">
-                <cat.icon className={`w-4 h-4 ${cat.iconColor}`} />
+              <div className="w-7 h-7 shrink-0 rounded-xl flex items-center justify-center bg-white/70 shadow-2xs">
+                <AllIcon className={`w-4 h-4 ${allStyle.iconColor}`} />
               </div>
-              <span
-                className={`text-xs font-bold leading-tight ${
-                  isActive ? 'text-[#FB7185]' : 'text-slate-700'
-                }`}
-              >
-                {cat.label}
+              <span className={`text-xs font-bold leading-tight truncate ${isActive ? 'text-[#FB7185]' : 'text-slate-700'}`}>
+                All Dresses
+              </span>
+            </button>
+          );
+        })()}
+
+        {allCategories.map(({ label, style }) => {
+          const CatIcon = style.icon;
+          const isActive = selectedCategory === label;
+          return (
+            <button
+              key={label}
+              type="button"
+              onClick={() => setSelectedCategory(label)}
+              className={`flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2.5 rounded-2xl border transition-all text-left w-full sm:w-auto ${
+                isActive
+                  ? 'border-[#FB7185] bg-[#FFF0F2] ring-2 ring-pink-200/50 shadow-xs'
+                  : `${style.border} ${style.bg} hover:border-slate-300`
+              }`}
+            >
+              <div className="w-7 h-7 shrink-0 rounded-xl flex items-center justify-center bg-white/70 shadow-2xs">
+                <CatIcon className={`w-4 h-4 ${style.iconColor}`} />
+              </div>
+              <span className={`text-xs font-bold leading-tight truncate ${isActive ? 'text-[#FB7185]' : 'text-slate-700'}`}>
+                {label}
               </span>
             </button>
           );
@@ -227,7 +379,20 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
               Category
             </h3>
             <div className="flex flex-col gap-2">
-              {CATEGORIES.map((cat) => {
+              <label className="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer select-none hover:text-[#FB7185] transition-colors">
+                <input
+                  type="radio"
+                  name="sidebarCategory"
+                  checked={selectedCategory === 'All Dresses'}
+                  onChange={() => setSelectedCategory('All Dresses')}
+                  className="w-3.5 h-3.5 accent-[#FB7185] rounded cursor-pointer"
+                />
+                <span className={selectedCategory === 'All Dresses' ? 'text-[#FB7185] font-bold' : ''}>
+                  All Dresses
+                </span>
+              </label>
+
+              {allCategories.map((cat) => {
                 const isChecked = selectedCategory === cat.label;
                 return (
                   <label
@@ -286,7 +451,7 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
             <input
               type="range"
               min="0"
-              max="2000"
+              max={maxAvailablePrice}
               step="50"
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -380,9 +545,21 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
                         <h4 className="text-xs sm:text-sm font-bold text-[#0F172A] leading-snug mb-1 line-clamp-2 min-h-[32px] sm:min-h-[38px] group-hover:text-[#FB7185] transition-colors" title={product.name}>
                           {product.name}
                         </h4>
-                        <p className="text-xs sm:text-sm font-black text-[#0284C7] mb-2.5">
-                          ₹{priceNum.toLocaleString('en-IN')}
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap mb-2.5">
+                          <p className="text-xs sm:text-sm font-black text-[#0284C7]">
+                            ₹{priceNum.toLocaleString('en-IN')}
+                          </p>
+                          {product.mrp && Number(product.mrp) > priceNum && (
+                            <>
+                              <span className="text-[11px] text-slate-400 line-through">
+                                ₹{Number(product.mrp).toLocaleString('en-IN')}
+                              </span>
+                              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
+                                {Math.round(((Number(product.mrp) - priceNum) / Number(product.mrp)) * 100)}% OFF
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </div>
 
                       {/* View Details Link */}
