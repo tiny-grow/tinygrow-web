@@ -13,7 +13,8 @@ export default function TinyEssentials({ about }: TinyEssentialsProps) {
     about?.description ||
     'Crafted with love and utmost care, our organic essentials provide the gentlest touch for your baby’s everyday journey.';
   const buttonText = about?.button_text || 'Explore Now';
-  const buttonLink = about?.button_link || '/new-arrivals';
+  const buttonLink =
+    about?.button_link && about.button_link !== '/new-arrivals' ? about.button_link : '/shop';
   const imageUrl =
     about?.image_url ||
     'https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=1200&auto=format&fit=crop';

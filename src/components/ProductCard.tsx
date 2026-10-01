@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, ArrowRight } from 'lucide-react';
+import { Heart, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Product } from '@/lib/supabase/types';
 
 interface ProductCardProps {
@@ -34,7 +34,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             href={`/product/${product.slug}`}
             className="w-full h-full flex flex-col items-center justify-center text-slate-400 p-3 text-center"
           >
-            <span className="text-2xl mb-1">🧸</span>
+            <ShoppingBag className="w-6 h-6 text-slate-300 mb-1" strokeWidth={1.5} />
             <span className="text-xs font-medium text-slate-500">{product.name}</span>
           </Link>
         )}

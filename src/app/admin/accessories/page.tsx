@@ -284,20 +284,22 @@ export default function AdminAccessoriesPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="p-12 text-center bg-white rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center text-3xl">💎</div>
+          <div className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-600">
+            <Tag className="w-7 h-7" />
+          </div>
           <div>
             <p className="text-sm font-bold text-slate-800">
               {searchQuery ? 'No accessories match your search' : 'No accessories added yet'}
             </p>
             <p className="text-xs text-slate-400 mt-1">
-              Click "Add Accessory" to add headbands, bibs, socks, bags and more.
+              Click &quot;Add Accessory&quot; to add headbands, bibs, socks, bags and more.
             </p>
           </div>
           {!searchQuery && (
             <button
               type="button"
               onClick={handleOpenAdd}
-              className="mt-2 inline-flex items-center gap-2 bg-violet-600 text-white font-bold text-xs py-2 px-4 rounded-xl"
+              className="mt-2 inline-flex items-center gap-2 bg-violet-600 text-white font-bold text-xs py-2 px-4 rounded-xl cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               Add First Accessory
@@ -323,8 +325,8 @@ export default function AdminAccessoriesPage() {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center text-slate-400 gap-1">
-                      <span className="text-3xl">💎</span>
+                    <div className="flex flex-col items-center justify-center text-slate-400 gap-1.5">
+                      <Tag className="w-8 h-8 text-violet-400" strokeWidth={1.5} />
                       <span className="text-[11px] font-semibold">No image</span>
                     </div>
                   )}
@@ -539,13 +541,14 @@ export default function AdminAccessoriesPage() {
                             key={age}
                             type="button"
                             onClick={() => toggleAge(age)}
-                            className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
+                            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
                               isSelected
                                 ? 'bg-violet-600 text-white shadow-2xs'
                                 : 'bg-white text-slate-600 border border-slate-200 hover:border-violet-300'
                             }`}
                           >
-                            {isSelected ? '✓ ' : ''}{age}
+                            {isSelected && <Check className="w-3 h-3 stroke-[2.5]" />}
+                            <span>{age}</span>
                           </button>
                         );
                       })}

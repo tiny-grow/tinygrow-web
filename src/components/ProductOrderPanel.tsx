@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageCircle, Plus, Minus, Check, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { MessageCircle, Plus, Minus, Check, ShieldCheck, Truck, RotateCcw, ShoppingBag } from 'lucide-react';
 import { Product, AGE_GROUP_OPTIONS } from '@/lib/supabase/types';
+import OrderAddressModal, { CustomerDeliveryDetails } from './OrderAddressModal';
 
 interface ProductOrderPanelProps {
   product: Product;
@@ -21,6 +22,41 @@ export default function ProductOrderPanel({
 
   const [selectedAge, setSelectedAge] = useState<string>(availableAges[0] || '0–3 Months');
   const [quantity, setQuantity] = useState<number>(1);
+  const [addedToCart, setAddedToCart] = useState<boolean>(false);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState<boolean>(false);
+
+  const handleAddToCart = () => {
+    try {
+      const existingCartRaw = typeof window !== 'undefined' ? localStorage.getItem('tinygrow_cart') : null;
+      const cart = existingCartRaw ? JSON.parse(existingCartRaw) : [];
+
+      const itemIndex = cart.findIndex(
+        (item: any) => item.id === product.id && item.selectedAge === selectedAge
+      );
+
+      if (itemIndex > -1) {
+        cart[itemIndex].quantity += quantity;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: Number(product.price),
+          image_url: product.image_url,
+          selectedAge,
+          quantity,
+        });
+      }
+
+      localStorage.setItem('tinygrow_cart', JSON.stringify(cart));
+      window.dispatchEvent(new Event('tinygrow_cart_updated'));
+
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 2500);
+    } catch (e) {
+      console.error('Failed to add to cart:', e);
+    }
+  };
 
   const effectiveNumber = whatsappNumber && !whatsappNumber.includes('98765')
     ? whatsappNumber
@@ -28,6 +64,10 @@ export default function ProductOrderPanel({
   const cleanPhone = effectiveNumber.replace(/\D/g, '') || '917994702567';
 
   const handleOrder = () => {
+    setIsAddressModalOpen(true);
+  };
+
+  const handleConfirmOrder = (details: CustomerDeliveryDetails) => {
     const productUrl =
       typeof window !== 'undefined'
         ? window.location.href
@@ -37,27 +77,37 @@ export default function ProductOrderPanel({
     const unitPrice = Number(product.price).toLocaleString('en-IN');
 
     const lines = [
-      '\uD83D\uDED2 *NEW ORDER - TINYGROW*',
-      '--------------------------------',
-      `\uD83D\uDC76 *Product:* ${product.name}`,
-      `\uD83D\uDCB0 *Total Price:* \u20B9${totalAmount} (${quantity} x \u20B9${unitPrice})`,
-      `\uD83D\uDCCF *Age / Size:* ${selectedAge}`,
-      `\uD83D\uDCE6 *Quantity:* ${quantity}`,
-      '--------------------------------',
-      '\uD83D\uDD17 *Product Link:*',
+      '🛍️ *NEW ORDER - TINYGROW*',
+      '================================',
+      '👤 *CUSTOMER & DELIVERY DETAILS:*',
+      `• *Name:* ${details.name}`,
+      `• *WhatsApp:* ${details.phone}`,
+      `• *Address:* ${details.address}`,
+      `• *District:* ${details.district}`,
+      `• *State:* ${details.state}`,
+      `• *PIN Code:* ${details.pincode}`,
+      '================================',
+      '📦 *PRODUCT ORDERED:*',
+      `• *Product:* ${product.name}`,
+      `• *Age / Size:* ${selectedAge}`,
+      `• *Quantity:* ${quantity}`,
+      `• *Price:* ₹${totalAmount} (${quantity} × ₹${unitPrice})`,
+      `• *Shipping:* FREE Delivery Across India`,
+      '================================',
+      '🔗 *Product Link:*',
       productUrl,
-      '--------------------------------',
-      '\u2728 *Please confirm my order and share delivery details. Thank you!*',
+      '================================',
+      '💬 *Please confirm my order and share UPI / payment details. Thank you!*',
     ];
 
     const message = lines.join('\n');
-    // Use TextEncoder to ensure proper UTF-8 encoding of emoji characters
     const encoded = Array.from(new TextEncoder().encode(message))
       .map((b) => '%' + b.toString(16).padStart(2, '0').toUpperCase())
       .join('');
 
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encoded}`;
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    setIsAddressModalOpen(false);
   };
 
   return (
@@ -123,20 +173,51 @@ export default function ProductOrderPanel({
         </div>
       </div>
 
-      {/* WhatsApp Direct Order CTA Button */}
-      <div className="flex flex-col gap-3 pt-2">
+      {/* WhatsApp Direct Order & Add to Cart CTAs */}
+      <div className="flex flex-col gap-2.5 pt-2">
         <button
           type="button"
           onClick={handleOrder}
-          className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-4 px-6 rounded-full flex items-center justify-center gap-2.5 shadow-md shadow-emerald-200 hover:shadow-lg transition-all active:scale-[0.99] text-base"
+          className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3.5 sm:py-4 px-6 rounded-full flex items-center justify-center gap-2.5 shadow-md shadow-emerald-200 hover:shadow-lg transition-all active:scale-[0.99] text-sm sm:text-base cursor-pointer"
         >
           <MessageCircle className="w-5 h-5 fill-current" />
           <span>Order on WhatsApp</span>
         </button>
 
-        <p className="text-xs text-center text-slate-400">
-          No online payment checkout needed. Our team will verify size and confirm your order directly on WhatsApp.
-        </p>
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          className={`w-full font-bold py-3.5 px-6 rounded-full flex items-center justify-center gap-2.5 transition-all active:scale-[0.99] text-sm sm:text-base cursor-pointer border-2 ${
+            addedToCart
+              ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm'
+              : 'bg-white hover:bg-pink-50/60 text-[#FB7185] hover:text-[#F43F5E] border-[#FB7185] shadow-xs hover:shadow-sm'
+          }`}
+        >
+          {addedToCart ? (
+            <>
+              <Check className="w-5 h-5 stroke-[2.5] text-emerald-600" />
+              <span>Added to Bag!</span>
+            </>
+          ) : (
+            <>
+              <ShoppingBag className="w-5 h-5 stroke-[2]" />
+              <span>Add to Cart</span>
+            </>
+          )}
+        </button>
+
+        {addedToCart ? (
+          <a
+            href="/cart"
+            className="text-xs text-center font-bold text-[#0284C7] hover:text-[#0369A1] hover:underline mt-1 inline-flex items-center justify-center gap-1"
+          >
+            <span>View Shopping Bag &amp; Checkout →</span>
+          </a>
+        ) : (
+          <p className="text-xs text-center text-slate-400 mt-1">
+            Fast WhatsApp ordering or add to your shopping bag.
+          </p>
+        )}
       </div>
 
       {/* Trust Badges */}
@@ -154,6 +235,15 @@ export default function ProductOrderPanel({
           <span className="text-[11px] font-semibold">Easy Returns</span>
         </div>
       </div>
+
+      {/* Address & Delivery Details Popup Modal */}
+      <OrderAddressModal
+        isOpen={isAddressModalOpen}
+        onClose={() => setIsAddressModalOpen(false)}
+        onConfirm={handleConfirmOrder}
+        orderTitle={product.name}
+        orderSubtotalText={`₹${(product.price * quantity).toLocaleString('en-IN')}`}
+      />
     </div>
   );
 }

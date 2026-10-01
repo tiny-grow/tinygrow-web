@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { Category } from '@/lib/supabase/types';
 
 interface CategoryCardsProps {
@@ -178,11 +178,9 @@ export default function CategoryCards({ categories }: CategoryCardsProps) {
                         />
                       </div>
                     ) : (
-                      /* Fallback Emoji on the left side */
+                      /* Fallback Icon on the left side */
                       <div className="absolute top-1/2 -translate-y-1/2 left-6 sm:left-8 z-0 pointer-events-none transition-transform duration-300 group-hover:scale-110">
-                        <span className="text-5xl sm:text-6xl select-none opacity-80">
-                          {theme.fallbackEmoji}
-                        </span>
+                        <ShoppingBag className="w-14 h-14 sm:w-16 sm:h-16 text-slate-400/50 stroke-[1.2]" />
                       </div>
                     )}
 

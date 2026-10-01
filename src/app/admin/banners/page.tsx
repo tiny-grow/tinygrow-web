@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, AlertCircle, Check, Loader2, ExternalLink, Image as ImageIcon, Type, Link as LinkIcon } from 'lucide-react';
+import { Save, AlertCircle, Check, Loader2, ExternalLink, Image as ImageIcon, Type, Link as LinkIcon, Sparkles } from 'lucide-react';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import ImageUploader from '@/components/admin/ImageUploader';
 import Link from 'next/link';
@@ -138,8 +138,8 @@ export default function AdminBannersPage() {
     title: 'Special Offers',
     subtitle: 'For your little happiness',
     tagline: '',
-    button_text: 'Shop Offers',
-    button_link: '/shop?filter=offers',
+    button_text: 'Shop Now',
+    button_link: '/shop',
     image_url: '',
     active: true,
   });
@@ -154,7 +154,7 @@ export default function AdminBannersPage() {
     subtitle: 'Ultra-soft daily wear essentials',
     tagline: 'Soft • Stylish • Safe',
     button_text: 'Explore',
-    button_link: '/shop',
+    button_link: '/category/accessories',
     image_url: '',
     active: true,
   });
@@ -345,7 +345,8 @@ export default function AdminBannersPage() {
                 : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/60'
             }`}
           >
-            <span>✨ All 3 Side-by-Side</span>
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>All 3 Side-by-Side</span>
           </button>
           <button
             type="button"
@@ -583,7 +584,7 @@ export default function AdminBannersPage() {
                       value={specialOffers.button_link}
                       onChange={(e) => setSpecialOffers((p) => ({ ...p, button_link: e.target.value }))}
                       className={`${inputClass} pl-7`}
-                      placeholder="/shop?filter=offers"
+                      placeholder="/shop"
                       spellCheck={false}
                       data-gramm="false"
                       data-enable-grammarly="false"
@@ -716,7 +717,7 @@ export default function AdminBannersPage() {
                       value={comfort.button_link}
                       onChange={(e) => setComfort((p) => ({ ...p, button_link: e.target.value }))}
                       className={`${inputClass} pl-7`}
-                      placeholder="/shop"
+                      placeholder="/category/accessories"
                       spellCheck={false}
                       data-gramm="false"
                       data-enable-grammarly="false"

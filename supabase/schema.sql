@@ -101,7 +101,7 @@ create table if not exists public.contact_information (
   email text default 'support@tinygrow.com',
   address text default '123 Joyful Lane, Blossom Garden, City - 400001',
   business_hours text default 'Mon - Sat: 9:00 AM - 7:00 PM',
-  announcement_text text default 'Free shipping on orders above ₹999 | Easy WhatsApp Ordering | 100% Baby-Safe Products',
+  announcement_text text default 'Free Delivery Across India | Easy WhatsApp Ordering | 100% Baby-Safe Products',
   updated_at timestamptz default timezone('utc'::text, now()) not null
 );
 
@@ -326,7 +326,7 @@ values (
   'care@tinygrow.com',
   '123 Joyful Lane, Blossom Garden, City - 400001',
   'Mon - Sat: 9:00 AM - 7:00 PM',
-  'Free shipping on orders above ₹999 | Easy WhatsApp Ordering | 100% Baby-Safe Products'
+  'Free Delivery Across India | Easy WhatsApp Ordering | 100% Baby-Safe Products'
 )
 on conflict do nothing;
 
@@ -376,14 +376,15 @@ values
     'Grow together everyday',
     'Ultra-soft daily wear essentials',
     'Explore',
-    '/shop',
+    '/category/accessories',
     null,
     true
   )
 on conflict (card_key) do update
 set
   title = excluded.title,
-  subtitle = excluded.subtitle;
+  subtitle = excluded.subtitle,
+  button_link = excluded.button_link;
 
 -- 4G. Starter Products
 do $$

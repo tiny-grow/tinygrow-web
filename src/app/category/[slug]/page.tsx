@@ -10,6 +10,7 @@ import {
   getContactInformation,
   getSocialLinks,
 } from '@/lib/supabase/queries';
+import { searchAndRankProducts } from '@/lib/searchUtils';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
@@ -17,17 +18,25 @@ export const revalidate = 0;
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ q?: string }>;
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const { slug } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const query = resolvedSearchParams?.q?.trim().toLowerCase() || '';
 
-  const [categories, allProducts, contactInfo, socialLinks] = await Promise.all([
+  const [categories, rawProducts, contactInfo, socialLinks] = await Promise.all([
     getCategories(),
     getProducts({ categorySlug: slug }),
     getContactInformation(),
     getSocialLinks(),
   ]);
+
+  let allProducts = rawProducts;
+  if (query) {
+    allProducts = searchAndRankProducts(allProducts, query);
+  }
 
   if (slug === 'dresses') {
     return (
