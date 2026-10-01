@@ -39,15 +39,29 @@ export default function NewArrivals({ products, whatsappNumber }: NewArrivalsPro
 
         {/* Product Grid / Empty State */}
         {products && products.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
-            {products.slice(0, 5).map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                whatsappNumber={whatsappNumber}
-              />
-            ))}
-          </div>
+          <>
+            {/* Mobile: 3-col grid showing 6 products */}
+            <div className="grid grid-cols-3 gap-3 sm:hidden">
+              {products.slice(0, 6).map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  whatsappNumber={whatsappNumber}
+                />
+              ))}
+            </div>
+            {/* sm+: original 4-5 col grid showing 5 products */}
+            <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
+              {products.slice(0, 5).map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  whatsappNumber={whatsappNumber}
+                />
+              ))}
+            </div>
+          </>
+
         ) : (
           <div className="rounded-3xl border border-dashed border-slate-200 bg-[#FAF9F7] p-10 text-center">
             <p className="text-sm font-semibold text-slate-600">

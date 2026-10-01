@@ -7,25 +7,25 @@ import {
   Plus,
   Edit2,
   Trash2,
-  Check,
-  AlertCircle,
   Loader2,
   Search,
   X,
   Tag,
   Sparkles,
   ExternalLink,
+  Check,
 } from 'lucide-react';
 import { Product, Category, AGE_GROUP_OPTIONS } from '@/lib/supabase/types';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import ImageUploader from '@/components/admin/ImageUploader';
+import { ToastContainer, useToast } from '@/components/admin/Toast';
 
 export default function AdminAccessoriesPage() {
   const [accessories, setAccessories] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const { toasts, addToast, removeToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
 
   // Modal / Form state
@@ -36,6 +36,7 @@ export default function AdminAccessoriesPage() {
   const [formSlug, setFormSlug] = useState('');
   const [formCategoryId, setFormCategoryId] = useState('');
   const [formPrice, setFormPrice] = useState<number | ''>('');
+  const [formMrp, setFormMrp] = useState<number | ''>('');
   const [formDescription, setFormDescription] = useState('');
   const [formImageUrl, setFormImageUrl] = useState('');
   const [formSuitableAges, setFormSuitableAges] = useState<string[]>([]);
@@ -67,7 +68,21 @@ export default function AdminAccessoriesPage() {
       if (accRes.error) throw accRes.error;
       if (catRes.error) throw catRes.error;
 
-      setAccessories((accRes.data as Product[]) || []);
+      const raw = (accRes.data as Product[]) || [];
+      const normalized = raw.map((p) => {
+        let mrp = p.mrp ? Number(p.mrp) : null;
+        if (!mrp && p.description && p.description.includes('[MRP:')) {
+          const m = p.description.match(/\[MRP:\s*([0-9.]+)\]/);
+          if (m && m[1]) mrp = Number(m[1]);
+        }
+        return {
+          ...p,
+          price: Number(p.price) || 0,
+          mrp: mrp && !isNaN(mrp) ? mrp : null,
+        };
+      });
+
+      setAccessories(normalized);
       setCategories((catRes.data as Category[]) || []);
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'Error fetching accessories');
@@ -87,6 +102,7 @@ export default function AdminAccessoriesPage() {
     setFormSlug('');
     setFormCategoryId('');
     setFormPrice('');
+    setFormMrp('');
     setFormDescription('');
     setFormImageUrl('');
     setFormSuitableAges([]);
@@ -108,7 +124,18 @@ export default function AdminAccessoriesPage() {
     setFormSlug(p.slug);
     setFormCategoryId(p.category_id || '');
     setFormPrice(p.price);
-    setFormDescription(p.description || '');
+
+    let mrpVal: number | '' = '';
+    if (p.mrp) {
+      mrpVal = Number(p.mrp);
+    } else if (p.description && p.description.includes('[MRP:')) {
+      const match = p.description.match(/\[MRP:\s*([0-9.]+)\]/);
+      if (match && match[1]) mrpVal = Number(match[1]);
+    }
+    setFormMrp(mrpVal);
+
+    const cleanDesc = (p.description || '').replace(/\s*\[MRP:\s*[0-9.]+\]/g, '').trim();
+    setFormDescription(cleanDesc);
     setFormImageUrl(p.image_url || '');
     setFormSuitableAges(p.suitable_ages || []);
     setFormStockStatus(p.stock_status);
@@ -125,11 +152,12 @@ export default function AdminAccessoriesPage() {
       const supabase = createClient();
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
-      setSuccessMsg(`"${name}" deleted.`);
-      setTimeout(() => setSuccessMsg(null), 3000);
+      addToast(`"${name}" deleted successfully!`, 'success');
       fetchData();
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Failed to delete');
+      const msg = err instanceof Error ? err.message : 'Failed to delete';
+      setErrorMsg(msg);
+      addToast(msg, 'error');
     }
   };
 
@@ -142,7 +170,6 @@ export default function AdminAccessoriesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
-    setSuccessMsg(null);
     setSaving(true);
 
     if (!isSupabaseConfigured()) {
@@ -152,11 +179,13 @@ export default function AdminAccessoriesPage() {
     }
 
     const slug = formSlug.trim() || formName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const payload = {
+    const mrpNumber = formMrp !== '' ? Number(formMrp) : null;
+    const payload: Record<string, unknown> = {
       name: formName.trim(),
       slug,
       category_id: formCategoryId || null,
       price: Number(formPrice) || 0,
+      mrp: mrpNumber,
       description: formDescription.trim() || null,
       image_url: formImageUrl.trim() || null,
       suitable_ages: formSuitableAges,
@@ -171,28 +200,53 @@ export default function AdminAccessoriesPage() {
     try {
       const supabase = createClient();
       if (isEditing && editingId) {
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from('products')
           .update(payload)
           .eq('id', editingId)
           .select();
+
+        if (error && (error.message?.includes('mrp') || (error as { details?: string })?.details?.includes('mrp'))) {
+          const fallbackPayload = { ...payload };
+          delete fallbackPayload.mrp;
+          if (mrpNumber) fallbackPayload.description = `${formDescription.trim() || ''} [MRP:${mrpNumber}]`.trim();
+          const retryRes = await supabase.from('products').update(fallbackPayload).eq('id', editingId).select();
+          if (!retryRes.error && retryRes.data) {
+            data = retryRes.data;
+            error = null;
+          }
+        }
+
         if (error) throw new Error(error.message);
         if (!data || data.length === 0)
           throw new Error('Update blocked by RLS. Run the SQL from supabase/schema.sql in your Supabase Dashboard → SQL Editor.');
-        setSuccessMsg(`"${formName}" updated!`);
+        addToast(`"${formName}" updated successfully! ✓`, 'success');
       } else {
-        const { data, error } = await supabase.from('products').insert(payload).select();
+        let { data, error } = await supabase.from('products').insert(payload).select();
+
+        if (error && (error.message?.includes('mrp') || (error as { details?: string })?.details?.includes('mrp'))) {
+          const fallbackPayload = { ...payload };
+          delete fallbackPayload.mrp;
+          if (mrpNumber) fallbackPayload.description = `${formDescription.trim() || ''} [MRP:${mrpNumber}]`.trim();
+          const retryRes = await supabase.from('products').insert(fallbackPayload).select();
+          if (!retryRes.error && retryRes.data) {
+            data = retryRes.data;
+            error = null;
+          }
+        }
+
         if (error) throw new Error(error.message);
         if (!data || data.length === 0)
           throw new Error('Insert blocked by RLS. Run the SQL from supabase/schema.sql in your Supabase Dashboard → SQL Editor.');
-        setSuccessMsg(`"${formName}" added to accessories!`);
+        addToast(`"${formName}" added to accessories! ✓`, 'success');
       }
 
       resetForm();
       fetchData();
-      setTimeout(() => setSuccessMsg(null), 3500);
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Operation failed');
+      const msg = err instanceof Error ? err.message : 'Operation failed';
+      setErrorMsg(msg);
+      addToast(msg, 'error');
     } finally {
       setSaving(false);
     }
@@ -242,22 +296,12 @@ export default function AdminAccessoriesPage() {
       {/* Messages */}
       {errorMsg && (
         <div className="my-4 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between text-xs text-rose-700">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
-            <span>{errorMsg}</span>
-          </div>
+          <span>{errorMsg}</span>
           <button type="button" onClick={() => setErrorMsg(null)}><X className="w-3.5 h-3.5" /></button>
         </div>
       )}
-      {successMsg && (
-        <div className="my-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-700">
-          <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-          <button type="button" onClick={() => setSuccessMsg(null)}><X className="w-3.5 h-3.5" /></button>
-        </div>
-      )}
+      {/* Toast notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
 
       {/* Search */}
       <div className="my-6 relative max-w-md">
@@ -352,7 +396,12 @@ export default function AdminAccessoriesPage() {
                   <h3 className="font-bold text-sm text-slate-900 group-hover:text-violet-600 transition-colors line-clamp-2 min-h-[36px] sm:min-h-[40px] leading-snug" title={a.name}>
                     {a.name}
                   </h3>
-                  <span className="text-xs font-black text-[#0F172A] shrink-0 mt-0.5">₹{Number(a.price).toLocaleString()}</span>
+                  <div className="flex flex-col items-end shrink-0 mt-0.5">
+                    <span className="text-xs font-black text-[#0F172A]">₹{Number(a.price).toLocaleString()}</span>
+                    {a.mrp && Number(a.mrp) > Number(a.price) && (
+                      <span className="text-[10px] text-slate-400 line-through">₹{Number(a.mrp).toLocaleString()}</span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 mb-2">
@@ -468,7 +517,7 @@ export default function AdminAccessoriesPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Category</label>
                       <select
@@ -482,8 +531,26 @@ export default function AdminAccessoriesPage() {
                         ))}
                       </select>
                     </div>
+
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Price (₹) *</label>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Stock Status</label>
+                      <select
+                        value={formStockStatus}
+                        onChange={(e) => setFormStockStatus(e.target.value as 'in_stock' | 'out_of_stock' | 'low_stock')}
+                        className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:border-violet-400"
+                      >
+                        <option value="in_stock">In Stock (Available)</option>
+                        <option value="low_stock">Low Stock (Hurry)</option>
+                        <option value="out_of_stock">Out of Stock</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Selling Price (₹) * <span className="text-[10px] text-emerald-600 font-semibold normal-case">(Actual Price)</span>
+                      </label>
                       <input
                         type="number"
                         required
@@ -494,19 +561,19 @@ export default function AdminAccessoriesPage() {
                         className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:border-violet-400"
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Stock Status</label>
-                    <select
-                      value={formStockStatus}
-                      onChange={(e) => setFormStockStatus(e.target.value as 'in_stock' | 'out_of_stock' | 'low_stock')}
-                      className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:border-violet-400"
-                    >
-                      <option value="in_stock">In Stock (Available)</option>
-                      <option value="low_stock">Low Stock (Hurry)</option>
-                      <option value="out_of_stock">Out of Stock</option>
-                    </select>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        MRP Price (₹) <span className="text-[10px] text-slate-400 font-semibold normal-case">(Strike Price)</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formMrp}
+                        onChange={(e) => setFormMrp(e.target.value === '' ? '' : Number(e.target.value))}
+                        placeholder="e.g. 299 (shown as strike)"
+                        className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:border-violet-400"
+                      />
+                    </div>
                   </div>
 
                   <div>

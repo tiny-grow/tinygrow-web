@@ -13,7 +13,7 @@ export const revalidate = 0;
 
 export default async function DressesPage() {
   const [allProducts, contactInfo, socialLinks] = await Promise.all([
-    getProducts({ categorySlug: 'dresses' }),
+    getProducts({ isDress: true }),
     getContactInformation(),
     getSocialLinks(),
   ]);

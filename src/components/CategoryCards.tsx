@@ -78,7 +78,40 @@ export default function CategoryCards({ categories }: CategoryCardsProps) {
     return () => window.removeEventListener('resize', updateVisibleCount);
   }, []);
 
-  if (!categories || categories.length === 0) {
+  // Only display primary featured collections on the homepage (Dresses, Accessories, Toys)
+  // Exclude dress types/subcategories like 'traditional', 'casual', 'party', etc.
+  const displayCategories = (categories || []).filter((cat) => {
+    const slug = (cat.slug || '').toLowerCase().trim();
+    const name = (cat.name || '').toLowerCase().trim();
+
+    // Reject subcategory tags
+    const isSubcategory =
+      slug === 'traditional' ||
+      name === 'traditional' ||
+      slug.includes('casual') ||
+      name.includes('casual') ||
+      slug.includes('party') ||
+      name.includes('party') ||
+      slug.includes('romper') ||
+      name.includes('romper') ||
+      slug.includes('frock') ||
+      name.includes('frock');
+
+    if (isSubcategory) return false;
+
+    // Only allow main collections or categories with an uploaded banner/image
+    const isMainCollection =
+      slug.includes('dress') ||
+      name.includes('dress') ||
+      slug.includes('accessor') ||
+      name.includes('accessor') ||
+      slug.includes('toy') ||
+      name.includes('toy');
+
+    return isMainCollection || Boolean(cat.image_url);
+  });
+
+  if (!displayCategories || displayCategories.length === 0) {
     return (
       <section className="px-4 sm:px-8 lg:px-12 py-5 bg-white">
         <div className="max-w-7xl mx-auto p-6 rounded-2xl bg-slate-50 border border-slate-100 text-center text-slate-500 text-xs">
@@ -88,7 +121,7 @@ export default function CategoryCards({ categories }: CategoryCardsProps) {
     );
   }
 
-  const totalCategories = categories.length;
+  const totalCategories = displayCategories.length;
   // Sliding activates if there are more categories than visible on screen
   const shouldSlide = totalCategories > visibleCount;
   const maxIndex = Math.max(0, totalCategories - visibleCount);
@@ -151,7 +184,7 @@ export default function CategoryCards({ categories }: CategoryCardsProps) {
                 : 'none',
             }}
           >
-            {categories.map((cat, idx) => {
+            {displayCategories.map((cat, idx) => {
               const theme = CARD_THEMES[idx % CARD_THEMES.length];
               const description = cat.description || theme.defaultDesc;
 

@@ -26,9 +26,10 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const query = resolvedSearchParams?.q?.trim().toLowerCase() || '';
 
+  const isDressPage = slug === 'dresses' || slug === 'clothing';
   const [categories, rawProducts, contactInfo, socialLinks] = await Promise.all([
     getCategories(),
-    getProducts({ categorySlug: slug }),
+    getProducts(isDressPage ? { isDress: true } : { categorySlug: slug }),
     getContactInformation(),
     getSocialLinks(),
   ]);
