@@ -13,6 +13,7 @@ import {
   ToyBrick,
   Sparkles,
   ExternalLink,
+  Check,
 } from 'lucide-react';
 import { Product, Category, AGE_GROUP_OPTIONS } from '@/lib/supabase/types';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
@@ -179,7 +180,7 @@ export default function AdminToysPage() {
 
     const slug = formSlug.trim() || formName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const mrpNumber = formMrp !== '' ? Number(formMrp) : null;
-    const payload = {
+    const payload: Record<string, unknown> = {
       name: formName.trim(),
       slug,
       category_id: formCategoryId || null,
