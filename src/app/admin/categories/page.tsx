@@ -7,6 +7,7 @@ import { Plus, Edit2, Trash2, Check, AlertCircle, Loader2, Search, X, Layers, Ey
 import { Category } from '@/lib/supabase/types';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import ImageUploader from '@/components/admin/ImageUploader';
+import { deleteMediaUrls } from '@/lib/mediaUtils';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -95,6 +96,9 @@ export default function AdminCategoriesPage() {
       return;
     }
 
+    const catToDelete = categories.find((c) => c.id === id);
+    const imageUrl = catToDelete?.image_url;
+
     try {
       const supabase = createClient();
       const { error } = await supabase.from('categories').delete().eq('id', id);
@@ -102,6 +106,11 @@ export default function AdminCategoriesPage() {
       if (error) {
         setErrorMsg(error.message);
       } else {
+        if (imageUrl) {
+          deleteMediaUrls([imageUrl]).catch((delErr) =>
+            console.warn('Failed to delete category image from Cloudinary:', delErr)
+          );
+        }
         setSuccessMsg(`Category "${name}" deleted.`);
         setTimeout(() => setSuccessMsg(null), 3000);
         fetchCategories();

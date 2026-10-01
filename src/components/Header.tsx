@@ -1,9 +1,9 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Search, ShoppingBag, Menu, X } from 'lucide-react';
+import { Search, ShoppingBag, Menu, X, Loader2, ArrowRight } from 'lucide-react';
 import BrandLogo from './BrandLogo';
 
 const navLinks = [
@@ -114,12 +114,143 @@ function MobileNav({ pathname, onNavigate }: { pathname: string | null; onNaviga
   );
 }
 
+interface SearchItem {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  mrp?: number | null;
+  image_url: string | null;
+  type: string;
+  is_toy: boolean;
+  is_accessory: boolean;
+}
+
+function SearchDropdown({
+  isLoading,
+  results,
+  query,
+  onSelect,
+  onViewAll,
+}: {
+  isLoading: boolean;
+  results: SearchItem[];
+  query: string;
+  onSelect: () => void;
+  onViewAll: () => void;
+}) {
+  const trimmed = query.trim();
+  if (!trimmed) return null;
+
+  return (
+    <div className="absolute top-full mt-2 left-0 right-0 sm:left-auto sm:right-0 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+      {isLoading ? (
+        <div className="py-7 px-4 flex items-center justify-center gap-2.5 text-xs text-slate-500">
+          <Loader2 className="w-4 h-4 animate-spin text-[#FB7185]" />
+          <span>Searching matching products...</span>
+        </div>
+      ) : results.length > 0 ? (
+        <div>
+          <div className="px-3.5 py-2 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            <span>Matching Products ({results.length})</span>
+            <span className="text-[10px] text-slate-400 font-normal lowercase">press enter for all</span>
+          </div>
+          <div className="max-h-72 sm:max-h-80 overflow-y-auto divide-y divide-slate-50">
+            {results.map((product) => {
+              let badgeStyle = 'bg-rose-50 text-rose-500 border-rose-200/60';
+              if (product.is_toy) {
+                badgeStyle = 'bg-amber-50 text-amber-600 border-amber-200/60';
+              } else if (product.is_accessory) {
+                badgeStyle = 'bg-purple-50 text-purple-600 border-purple-200/60';
+              }
+
+              return (
+                <Link
+                  key={product.id}
+                  href={`/product/${product.slug}`}
+                  onClick={onSelect}
+                  className="flex items-center gap-3 p-3 hover:bg-pink-50/50 transition-colors group"
+                >
+                  <div className="w-11 h-11 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-100 relative">
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-300">
+                        <ShoppingBag className="w-5 h-5" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-800 group-hover:text-[#FB7185] truncate transition-colors">
+                      {product.name}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs font-bold text-slate-900">
+                        ₹{product.price}
+                      </span>
+                      {product.mrp && product.mrp > product.price && (
+                        <span className="text-[10px] text-slate-400 line-through">
+                          ₹{product.mrp}
+                        </span>
+                      )}
+                      <span
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${badgeStyle}`}
+                      >
+                        {product.type}
+                      </span>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#FB7185] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                </Link>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            onClick={onViewAll}
+            className="w-full py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 hover:text-slate-900 text-center transition-colors border-t border-slate-100 flex items-center justify-center gap-1.5"
+          >
+            <span>View all matching results for &ldquo;{trimmed}&rdquo;</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ) : (
+        <div className="py-6 px-4 text-center">
+          <p className="text-xs font-medium text-slate-700">
+            No products found matching &ldquo;{trimmed}&rdquo;
+          </p>
+          <p className="text-[11px] text-slate-400 mt-1">
+            Try searching for frocks, dresses, toys, or accessories
+          </p>
+          <button
+            type="button"
+            onClick={onViewAll}
+            className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#FB7185] hover:underline"
+          >
+            Search in All Products →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchItem[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+
+  const desktopSearchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -128,6 +259,66 @@ export default function Header() {
       if (q) setSearchQuery(q);
     }
   }, [pathname]);
+
+  // Close dropdown on navigation
+  useEffect(() => {
+    setIsDropdownOpen(false);
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Handle outside click & escape key
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      const insideDesktop = desktopSearchRef.current?.contains(target);
+      const insideMobile = mobileSearchRef.current?.contains(target);
+      if (!insideDesktop && !insideMobile) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // Debounced live search
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed) {
+      setSearchResults([]);
+      setIsDropdownOpen(false);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(data.products || []);
+          setIsDropdownOpen(true);
+        }
+      } catch (err) {
+        console.error('Failed to search products:', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     const updateCartCount = () => {
@@ -156,8 +347,9 @@ export default function Header() {
     };
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsDropdownOpen(false);
     const q = searchQuery.trim();
     if (q) {
       router.push(`/shop?q=${encodeURIComponent(q)}`);
@@ -165,6 +357,17 @@ export default function Header() {
       router.push('/shop');
     }
     setMobileMenuOpen(false);
+  };
+
+  const handleSelectProduct = () => {
+    setIsDropdownOpen(false);
+    setMobileMenuOpen(false);
+  };
+
+  const handleClear = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -180,26 +383,52 @@ export default function Header() {
 
         {/* Right Section: Search & Utility Icons */}
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Search Bar */}
-          <form
-            onSubmit={handleSearch}
-            className="relative hidden sm:block w-52 md:w-64"
-          >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for dresses, toys..."
-              className="w-full bg-[#F1F5F9] text-xs sm:text-sm text-[#1E293B] placeholder-[#94A3B8] rounded-full py-2 pl-4 pr-9 border border-transparent focus:outline-none focus:border-[#38BDF8] focus:bg-white transition-all"
-            />
-            <button
-              type="submit"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#1E293B] transition-colors"
-              aria-label="Search"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-          </form>
+          {/* Desktop Search Bar & Dropdown */}
+          <div ref={desktopSearchRef} className="relative hidden sm:block w-52 md:w-64">
+            <form onSubmit={handleSearch} className="relative w-full">
+              <input
+                type="text"
+                value={searchQuery}
+                onFocus={() => {
+                  if (searchQuery.trim().length > 0) setIsDropdownOpen(true);
+                }}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search dresses, toys, accessories..."
+                className="w-full bg-[#F1F5F9] text-xs sm:text-sm text-[#1E293B] placeholder-[#94A3B8] rounded-full py-2 pl-4 pr-14 border border-transparent focus:outline-none focus:border-[#38BDF8] focus:bg-white transition-all"
+              />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {isSearching ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#FB7185]" />
+                ) : searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    className="text-slate-400 hover:text-slate-600 p-0.5 transition-colors"
+                    title="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : null}
+                <button
+                  type="submit"
+                  className="text-[#64748B] hover:text-[#1E293B] p-1 transition-colors"
+                  aria-label="Search"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+
+            {isDropdownOpen && searchQuery.trim() && (
+              <SearchDropdown
+                isLoading={isSearching}
+                results={searchResults}
+                query={searchQuery}
+                onSelect={handleSelectProduct}
+                onViewAll={() => handleSearch()}
+              />
+            )}
+          </div>
 
           {/* Icons */}
           <div className="flex items-center gap-1.5 sm:gap-3 text-[#1E293B]">
@@ -233,21 +462,51 @@ export default function Header() {
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden mt-3 pt-3 border-t border-slate-100 pb-3 flex flex-col gap-3">
-          <form onSubmit={handleSearch} className="relative sm:hidden w-full">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for dresses, toys..."
-              className="w-full bg-[#F1F5F9] text-sm text-[#1E293B] placeholder-[#94A3B8] rounded-full py-2 pl-4 pr-9 border border-transparent focus:outline-none focus:border-[#38BDF8]"
-            />
-            <button
-              type="submit"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B]"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-          </form>
+          <div ref={mobileSearchRef} className="relative sm:hidden w-full">
+            <form onSubmit={handleSearch} className="relative w-full">
+              <input
+                type="text"
+                value={searchQuery}
+                onFocus={() => {
+                  if (searchQuery.trim().length > 0) setIsDropdownOpen(true);
+                }}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search dresses, toys, accessories..."
+                className="w-full bg-[#F1F5F9] text-sm text-[#1E293B] placeholder-[#94A3B8] rounded-full py-2 pl-4 pr-14 border border-transparent focus:outline-none focus:border-[#38BDF8]"
+              />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {isSearching ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#FB7185]" />
+                ) : searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    className="text-slate-400 hover:text-slate-600 p-0.5 transition-colors"
+                    title="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : null}
+                <button
+                  type="submit"
+                  className="text-[#64748B] hover:text-[#1E293B] p-1 transition-colors"
+                  aria-label="Search"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+
+            {isDropdownOpen && searchQuery.trim() && (
+              <SearchDropdown
+                isLoading={isSearching}
+                results={searchResults}
+                query={searchQuery}
+                onSelect={handleSelectProduct}
+                onViewAll={() => handleSearch()}
+              />
+            )}
+          </div>
 
           <MobileNav pathname={pathname} onNavigate={() => setMobileMenuOpen(false)} />
         </div>

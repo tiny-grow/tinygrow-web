@@ -51,8 +51,9 @@ const SYNONYMS: Record<string, string[]> = {
   plush: ['teddy', 'bear', 'stuffed'],
   beanie: ['cap', 'hat', 'booties'],
   booties: ['shoes', 'socks', 'beanie'],
-  accessory: ['accessories', 'beanie', 'booties', 'teether', 'rattle'],
-  accessories: ['accessory', 'beanie', 'booties', 'teether', 'rattle'],
+  accessory: ['accessories', 'accessorie', 'beanie', 'booties', 'teether', 'rattle'],
+  accessories: ['accessory', 'accessorie', 'beanie', 'booties', 'teether', 'rattle'],
+  accessorie: ['accessory', 'accessories', 'beanie', 'booties', 'teether', 'rattle'],
   teether: ['rattle', 'silicone', 'feeder', 'teething'],
   stacker: ['rings', 'montessori', 'wooden'],
 };
@@ -124,7 +125,7 @@ export function matchesSearchSpelling(product: Product, query: string): boolean 
       : '';
   const ages = (product.suitable_ages || []).join(' ').toLowerCase();
   const extraTags = `${product.is_toy ? 'toy toys montessori plush' : ''} ${
-    product.is_accessory ? 'accessory accessories beanie booties teether' : ''
+    product.is_accessory ? 'accessory accessories accessorie beanie booties teether' : 'dress dresses frock frocks outfit clothing'
   }`;
 
   const allProductText = `${name} ${desc} ${slug} ${catName} ${ages} ${extraTags}`;

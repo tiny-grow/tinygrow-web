@@ -37,14 +37,51 @@ const CAT_STYLE_PALETTE = [
   { bg: 'bg-[#ECFDF5]', border: 'border-emerald-100', iconColor: 'text-emerald-500', icon: Leaf },
 ];
 
-const SIZES = [
-  '0 - 6 Months',
-  '6 - 12 Months',
-  '1 - 2 Years',
-  '2 - 3 Years',
-  '3 - 4 Years',
-  '4 - 5 Years',
+const AGE_GROUPS = [
+  '0–3 Months',
+  '3–6 Months',
+  '6–12 Months',
+  '1–2 Years',
+  '2–3 Years',
+  '3–4 Years',
+  '4–5 Years',
 ];
+
+function normalizeAge(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[–—−]/g, '-') // normalize en-dash, em-dash, minus to hyphen
+    .replace(/\s*-\s*/g, '-') // remove whitespace around hyphen
+    .replace(/\s+/g, '') // remove remaining spaces
+    .trim();
+}
+
+function matchesAgeGroup(productAges: string[] | undefined, selectedAges: string[]): boolean {
+  if (!selectedAges || selectedAges.length === 0) return true;
+  if (!productAges || productAges.length === 0) return false;
+
+  const normalizedProductAges = productAges.map(normalizeAge);
+
+  return selectedAges.some((sel) => {
+    const normSel = normalizeAge(sel);
+
+    // Exact normalized match (e.g. '1-2years' === '1-2years')
+    if (normalizedProductAges.includes(normSel)) return true;
+
+    // Range-level compatibility
+    if (normSel === '0-6months') {
+      return (
+        normalizedProductAges.includes('0-3months') ||
+        normalizedProductAges.includes('3-6months')
+      );
+    }
+    if ((normSel === '0-3months' || normSel === '3-6months') && normalizedProductAges.includes('0-6months')) {
+      return true;
+    }
+
+    return false;
+  });
+}
 
 const STANDARD_CATEGORIES = [
   'Casual Dresses',
@@ -217,11 +254,9 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
 
       // 3. Size / Age filter
       if (selectedSizes.length > 0) {
-        const productAges = product.suitable_ages || [];
-        const matchesSize =
-          productAges.length === 0 || // If not specified, keep accessible
-          productAges.some((s) => selectedSizes.includes(s));
-        if (!matchesSize) return false;
+        if (!matchesAgeGroup(product.suitable_ages, selectedSizes)) {
+          return false;
+        }
       }
 
       // 4. Price filter
@@ -255,7 +290,7 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
   const resetFilters = () => {
     setSelectedCategory('All Dresses');
     setSelectedSizes([]);
-    setMaxPrice(2000);
+    setMaxPrice(maxAvailablePrice > 5000 ? maxAvailablePrice : 10000);
     setSearchQuery('');
   };
 
@@ -362,11 +397,11 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
               <SlidersHorizontal className="w-4 h-4 text-[#FB7185]" />
               <span>Filters</span>
             </div>
-            {(selectedCategory !== 'All Dresses' || selectedSizes.length > 0 || maxPrice < 2000 || searchQuery) && (
+            {(selectedCategory !== 'All Dresses' || selectedSizes.length > 0 || maxPrice < maxAvailablePrice || searchQuery) && (
               <button
                 type="button"
                 onClick={resetFilters}
-                className="text-[11px] font-semibold text-[#FB7185] hover:underline"
+                className="text-[11px] font-semibold text-[#FB7185] hover:underline cursor-pointer"
               >
                 Reset
               </button>
@@ -415,27 +450,38 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
             </div>
           </div>
 
-          {/* Section 2: Size */}
+          {/* Section 2: Age Group */}
           <div className="mb-5 pt-4 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-[#0F172A] mb-2.5">
-              Size
-            </h3>
+            <div className="flex items-center justify-between mb-2.5">
+              <h3 className="text-xs font-bold text-[#0F172A]">
+                Age Group
+              </h3>
+              {selectedSizes.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedSizes([])}
+                  className="text-[10px] font-semibold text-[#FB7185] hover:underline cursor-pointer"
+                >
+                  Clear ({selectedSizes.length})
+                </button>
+              )}
+            </div>
             <div className="flex flex-col gap-2">
-              {SIZES.map((size) => {
-                const isChecked = selectedSizes.includes(size);
+              {AGE_GROUPS.map((age) => {
+                const isChecked = selectedSizes.includes(age);
                 return (
                   <label
-                    key={size}
+                    key={age}
                     className="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer select-none hover:text-[#FB7185] transition-colors"
                   >
                     <input
                       type="checkbox"
                       checked={isChecked}
-                      onChange={() => toggleSize(size)}
+                      onChange={() => toggleSize(age)}
                       className="w-3.5 h-3.5 accent-[#FB7185] rounded cursor-pointer"
                     />
                     <span className={isChecked ? 'text-[#FB7185] font-bold' : ''}>
-                      {size}
+                      {age}
                     </span>
                   </label>
                 );
@@ -545,6 +591,20 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
                         <h4 className="text-xs sm:text-sm font-bold text-[#0F172A] leading-snug mb-1 line-clamp-2 min-h-[32px] sm:min-h-[38px] group-hover:text-[#FB7185] transition-colors" title={product.name}>
                           {product.name}
                         </h4>
+                        {product.suitable_ages && product.suitable_ages.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {product.suitable_ages.slice(0, 2).map((age) => (
+                              <span key={age} className="text-[9px] font-semibold text-slate-500 bg-slate-50 border border-slate-200/80 px-1.5 py-0.5 rounded">
+                                {age}
+                              </span>
+                            ))}
+                            {product.suitable_ages.length > 2 && (
+                              <span className="text-[9px] text-slate-400 font-medium self-center">
+                                +{product.suitable_ages.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 flex-wrap mb-2.5">
                           <p className="text-xs sm:text-sm font-black text-[#0284C7]">
                             ₹{priceNum.toLocaleString('en-IN')}

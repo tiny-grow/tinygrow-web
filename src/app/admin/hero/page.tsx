@@ -7,6 +7,7 @@ import { HeroBanner } from '@/lib/supabase/types';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import ImageUploader from '@/components/admin/ImageUploader';
 import { ToastContainer, useToast } from '@/components/admin/Toast';
+import { deleteMediaUrls } from '@/lib/mediaUtils';
 
 export default function AdminHeroPage() {
   const [hero, setHero] = useState<HeroBanner | null>(null);
@@ -127,6 +128,12 @@ export default function AdminHeroPage() {
   };
 
   const handleRemoveDesktopBanner = (index: number) => {
+    const urlToRemove = desktopBanners[index];
+    if (urlToRemove) {
+      deleteMediaUrls([urlToRemove]).catch((err) =>
+        console.warn('Failed to delete desktop banner from Cloudinary:', err)
+      );
+    }
     setDesktopBanners((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -145,6 +152,12 @@ export default function AdminHeroPage() {
   };
 
   const handleRemoveMobileBanner = (index: number) => {
+    const urlToRemove = mobileBanners[index];
+    if (urlToRemove) {
+      deleteMediaUrls([urlToRemove]).catch((err) =>
+        console.warn('Failed to delete mobile banner from Cloudinary:', err)
+      );
+    }
     setMobileBanners((prev) => prev.filter((_, i) => i !== index));
   };
 

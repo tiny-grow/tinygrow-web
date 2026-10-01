@@ -359,15 +359,30 @@ export default function Footer({ contact, socials = [] }: FooterProps) {
           </div>
         </div>
 
-        {/* ── Bottom Bar: Copyright & Heartwarming Tagline ── */}
+        {/* ── Bottom Bar: Copyright, Tagline & Crafted By ── */}
         <div className="pt-8 mt-8 border-t border-[#D6E8F6] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#64748B]">
           <div className="flex items-center gap-1.5 text-center sm:text-left">
             <span>&copy; {new Date().getFullYear()} TinyGrow. Little Moments, Made to Grow.</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[#64748B] text-xs">
-            <span>Made with love for happy little smiles</span>
-            <Heart className="w-3.5 h-3.5 fill-[#FB7185] text-[#FB7185]" />
+          <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-end text-xs text-[#64748B]">
+            <div className="flex items-center gap-1.5">
+              <span>Made with love for happy little smiles</span>
+              <Heart className="w-3.5 h-3.5 fill-[#FB7185] text-[#FB7185]" />
+            </div>
+            <span className="hidden sm:inline text-slate-300">•</span>
+            <a
+              href="https://www.ekodrix.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] text-[#64748B] hover:text-[#0284C7] transition-colors inline-flex items-center gap-1 group"
+              title="Visit Ekodrix"
+            >
+              <span>Crafted by</span>
+              <span className="font-bold text-[#0F172A] group-hover:text-[#0284C7] underline decoration-slate-300 hover:decoration-[#0284C7] underline-offset-2 transition-colors">
+                ekodrix
+              </span>
+            </a>
           </div>
         </div>
       </div>
