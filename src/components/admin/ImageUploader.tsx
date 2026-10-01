@@ -2,8 +2,10 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { Upload, Link2, X, Loader2, ImageIcon, Check, RefreshCw, AlertCircle } from 'lucide-react';
+import { Upload, Link2, X, Loader2, ImageIcon, Check, RefreshCw, AlertCircle, Sparkles } from 'lucide-react';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { compressImage } from '@/lib/imageCompression';
+import { deleteMediaUrls } from '@/lib/mediaUtils';
 
 interface ImageUploaderProps {
   value: string;
@@ -21,8 +23,9 @@ export default function ImageUploader({
   hint,
 }: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string>('Uploading photo...');
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [tab, setTab] = useState<'upload' | 'url'>('upload');
   const [urlInput, setUrlInput] = useState(value || '');
@@ -39,16 +42,34 @@ export default function ImageUploader({
         setError('Please select an image file (PNG, JPG, WebP, etc.)');
         return;
       }
-      if (file.size > 10 * 1024 * 1024) {
-        setError('Image must be smaller than 10MB');
+      if (file.size > 20 * 1024 * 1024) {
+        setError('Image must be smaller than 20MB');
         return;
       }
 
       setError(null);
-      setSuccess(false);
+      setSuccess(null);
       setUploading(true);
+      setUploadStatus('Compressing photo for storage optimization...');
 
       try {
+        // Compress image before upload (converts high-res camera photos to WebP < 250KB)
+        const compression = await compressImage(file, {
+          maxWidth: 1600,
+          maxHeight: 1600,
+          quality: 0.82,
+        });
+
+        const fileToUpload = compression.file;
+        const origSizeKb = (compression.originalSize / 1024).toFixed(0);
+        const compSizeKb = (compression.compressedSize / 1024).toFixed(0);
+
+        if (compression.wasCompressed && compression.reductionPercentage > 0) {
+          setUploadStatus(`Uploading compressed photo (${origSizeKb} KB → ${compSizeKb} KB, -${compression.reductionPercentage}%)...`);
+        } else {
+          setUploadStatus('Uploading photo to Cloudinary...');
+        }
+
         const headers: Record<string, string> = {};
         if (isSupabaseConfigured()) {
           try {
@@ -63,7 +84,7 @@ export default function ImageUploader({
         }
 
         const fd = new FormData();
-        fd.append('file', file);
+        fd.append('file', fileToUpload);
         const res = await fetch('/api/upload', {
           method: 'POST',
           headers,
@@ -77,8 +98,12 @@ export default function ImageUploader({
 
         onChange(data.url);
         setUrlInput(data.url);
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
+        if (compression.wasCompressed && compression.reductionPercentage > 0) {
+          setSuccess(`Photo compressed & saved to Cloudinary! (${origSizeKb} KB → ${compSizeKb} KB, saved ${compression.reductionPercentage}%)`);
+        } else {
+          setSuccess('Photo uploaded to Cloudinary successfully!');
+        }
+        setTimeout(() => setSuccess(null), 4000);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Upload failed. Try using a URL instead.');
       } finally {
@@ -235,8 +260,8 @@ export default function ImageUploader({
               {uploading ? (
                 <div className="flex flex-col items-center gap-2">
                   <Loader2 className="w-8 h-8 text-[#FB7185] animate-spin" />
-                  <p className="text-xs font-bold text-slate-700">Uploading photo to Cloudinary...</p>
-                  <p className="text-[11px] text-slate-400">Please wait a moment</p>
+                  <p className="text-xs font-bold text-slate-700">{uploadStatus}</p>
+                  <p className="text-[11px] text-slate-400">Compressing & optimizing for fast loading</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2.5 pointer-events-none">
@@ -248,7 +273,7 @@ export default function ImageUploader({
                       Click to browse or drag & drop photo here
                     </p>
                     <p className="text-[11px] text-slate-400 mt-0.5">
-                      PNG, JPG, WebP up to 10MB
+                      Auto-compressed to WebP (saves ~95% Cloudinary storage)
                     </p>
                   </div>
                 </div>
@@ -274,9 +299,9 @@ export default function ImageUploader({
 
       {/* Success banner */}
       {success && (
-        <p className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-          <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-          Photo uploaded to Cloudinary successfully!
+        <p className="text-[11px] font-bold text-emerald-600 flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/80 rounded-lg px-2.5 py-1.5">
+          <Check className="w-3.5 h-3.5 stroke-[2.5] text-emerald-600 shrink-0" />
+          <span>{success}</span>
         </p>
       )}
 
