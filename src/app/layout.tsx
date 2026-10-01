@@ -12,6 +12,15 @@ export const metadata: Metadata = {
   title: "TinyGrow - Little Moments, Made to Grow | Baby Clothing & Toys",
   description:
     "Discover adorable and gentle baby clothing, little accessories, and joyful toys made with love and safety for your little ones.",
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

@@ -16,6 +16,7 @@ export interface Product {
   slug: string;
   description: string | null;
   price: number;
+  mrp?: number | null;
   image_url: string | null;
   suitable_ages: string[];
   stock_status: 'in_stock' | 'out_of_stock' | 'low_stock';
@@ -36,6 +37,7 @@ export interface HeroBanner {
   subtitle: string | null;
   description: string | null;
   image_url: string | null;
+  desktop_banner_urls?: string[] | null;
   mobile_image_url?: string | null;
   mobile_banner_urls?: string[] | null;
   button_text: string | null;

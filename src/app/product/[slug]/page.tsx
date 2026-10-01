@@ -151,14 +151,26 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 </h1>
 
                 {/* Price */}
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] mb-4">
-                  ₹{Number(product.price).toLocaleString()}
+                <div className="flex items-baseline gap-3 mb-4 flex-wrap">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-[#0F172A]">
+                    ₹{Number(product.price).toLocaleString()}
+                  </span>
+                  {product.mrp && Number(product.mrp) > Number(product.price) && (
+                    <>
+                      <span className="text-base sm:text-lg text-slate-400 line-through font-medium">
+                        ₹{Number(product.mrp).toLocaleString()}
+                      </span>
+                      <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                        {Math.round(((Number(product.mrp) - Number(product.price)) / Number(product.mrp)) * 100)}% OFF
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 {/* Description */}
                 {product.description && (
                   <p className="text-sm text-[#475569] leading-relaxed mb-6 pb-6 border-b border-slate-100">
-                    {product.description}
+                    {product.description.replace(/\s*\[(MRP|STYLE):[^\]]+\]/gi, '').trim()}
                   </p>
                 )}
 

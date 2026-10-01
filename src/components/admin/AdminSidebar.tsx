@@ -27,7 +27,7 @@ const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, color: 'text-sky-400' },
   { label: 'Hero Banner', href: '/admin/hero', icon: Sparkles, color: 'text-yellow-400' },
   { label: 'Categories', href: '/admin/categories', icon: Layers, color: 'text-purple-400' },
-  { label: 'Products', href: '/admin/products', icon: ShoppingBag, color: 'text-pink-400' },
+  { label: 'Dresses', href: '/admin/products', icon: ShoppingBag, color: 'text-pink-400' },
   { label: 'Toys', href: '/admin/toys', icon: ToyBrick, color: 'text-emerald-400' },
   { label: 'Accessories', href: '/admin/accessories', icon: Tag, color: 'text-violet-400' },
   { label: 'Homepage Banners', href: '/admin/banners', icon: ImageIcon, color: 'text-pink-400' },
