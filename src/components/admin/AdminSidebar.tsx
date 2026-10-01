@@ -1,0 +1,166 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import {
+  LayoutDashboard,
+  Sparkles,
+  Layers,
+  ShoppingBag,
+  Image,
+  PhoneCall,
+  Share2,
+  LogOut,
+  ExternalLink,
+  Menu,
+  X,
+  ChevronRight,
+  ToyBrick,
+  Tag,
+} from 'lucide-react';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+
+const navItems = [
+  { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, emoji: '🏠', color: 'text-sky-400' },
+  { label: 'Hero Banner', href: '/admin/hero', icon: Sparkles, emoji: '✨', color: 'text-yellow-400' },
+  { label: 'Categories', href: '/admin/categories', icon: Layers, emoji: '📂', color: 'text-purple-400' },
+  { label: 'Products', href: '/admin/products', icon: ShoppingBag, emoji: '🛍️', color: 'text-pink-400' },
+  { label: 'Toys', href: '/admin/toys', icon: ToyBrick, emoji: '🧸', color: 'text-emerald-400' },
+  { label: 'Accessories', href: '/admin/accessories', icon: Tag, emoji: '💎', color: 'text-violet-400' },
+  { label: 'Homepage Banners', href: '/admin/banners', icon: Image, emoji: '🖼️', color: 'text-pink-400' },
+  { label: 'Contact & Info', href: '/admin/contact', icon: PhoneCall, emoji: '📞', color: 'text-orange-400' },
+  { label: 'Social Links', href: '/admin/social', icon: Share2, emoji: '🔗', color: 'text-blue-400' },
+];
+
+function SidebarContent({ pathname, onNav }: { pathname: string; onNav?: () => void }) {
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    }
+    router.push('/admin/login');
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Brand Header */}
+      <div className="px-6 py-5 border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FB7185] to-[#F43F5E] flex items-center justify-center shadow-lg shadow-pink-500/30 text-lg">
+            🌱
+          </div>
+          <div>
+            <p className="text-white font-extrabold text-base tracking-tight leading-none">TinyGrow</p>
+            <p className="text-slate-400 text-[10px] font-medium mt-0.5">Admin Panel</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 p-3 flex flex-col gap-0.5 overflow-y-auto">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 px-3 pt-2 pb-1">Navigation</p>
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onNav}
+              className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${
+                isActive
+                  ? 'bg-white/10 text-white shadow-sm'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all text-base ${
+                isActive ? 'bg-white/15' : 'bg-white/5 group-hover:bg-white/10'
+              }`}>
+                {item.emoji}
+              </span>
+              <span className="flex-1">{item.label}</span>
+              {isActive && <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Bottom Utilities */}
+      <div className="p-3 border-t border-white/10 flex flex-col gap-1">
+        <Link
+          href="/"
+          target="_blank"
+          onClick={onNav}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition-all group"
+        >
+          <span className="w-8 h-8 rounded-lg bg-white/5 group-hover:bg-white/10 flex items-center justify-center text-base shrink-0">🌐</span>
+          <span className="flex-1">View Storefront</span>
+          <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full font-bold border border-emerald-500/30">LIVE</span>
+        </Link>
+
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-all text-left group"
+        >
+          <span className="w-8 h-8 rounded-lg bg-white/5 group-hover:bg-rose-500/10 flex items-center justify-center text-base shrink-0">🚪</span>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function AdminSidebar() {
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  if (pathname === '/admin/login') return null;
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 shrink-0 flex-col bg-[#0F172A] border-r border-white/5 h-screen sticky top-0">
+        <SidebarContent pathname={pathname} />
+      </aside>
+
+      {/* Mobile: Top bar with hamburger */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#0F172A] border-b border-white/10 h-14 flex items-center justify-between px-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FB7185] to-[#F43F5E] flex items-center justify-center text-sm">🌱</div>
+          <span className="text-white font-extrabold text-sm">TinyGrow Admin</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white"
+        >
+          <Menu className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Mobile Drawer Overlay */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="relative w-72 bg-[#0F172A] h-full flex flex-col shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white z-10"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <SidebarContent pathname={pathname} onNav={() => setMobileOpen(false)} />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

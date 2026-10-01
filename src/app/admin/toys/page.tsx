@@ -1,0 +1,596 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Check,
+  AlertCircle,
+  Loader2,
+  Search,
+  X,
+  ToyBrick,
+  Sparkles,
+  ExternalLink,
+} from 'lucide-react';
+import { Product, Category, AGE_GROUP_OPTIONS } from '@/lib/supabase/types';
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import ImageUploader from '@/components/admin/ImageUploader';
+
+export default function AdminToysPage() {
+  const [toys, setToys] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Modal / Form state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formName, setFormName] = useState('');
+  const [formSlug, setFormSlug] = useState('');
+  const [formCategoryId, setFormCategoryId] = useState('');
+  const [formPrice, setFormPrice] = useState<number | ''>('');
+  const [formDescription, setFormDescription] = useState('');
+  const [formImageUrl, setFormImageUrl] = useState('');
+  const [formSuitableAges, setFormSuitableAges] = useState<string[]>([]);
+  const [formStockStatus, setFormStockStatus] = useState<'in_stock' | 'out_of_stock' | 'low_stock'>('in_stock');
+  const [formFeatured, setFormFeatured] = useState(false);
+  const [formNewArrival, setFormNewArrival] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const fetchData = async () => {
+    setLoading(true);
+    if (!isSupabaseConfigured()) {
+      setToys([]);
+      setCategories([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const supabase = createClient();
+      const [toyRes, catRes] = await Promise.all([
+        supabase
+          .from('products')
+          .select('*, categories(*)')
+          .eq('is_toy', true)
+          .order('created_at', { ascending: false }),
+        supabase.from('categories').select('*').order('display_order', { ascending: true }),
+      ]);
+
+      if (toyRes.error) throw toyRes.error;
+      if (catRes.error) throw catRes.error;
+
+      setToys((toyRes.data as Product[]) || []);
+      setCategories((catRes.data as Category[]) || []);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Error fetching toys');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const resetForm = () => {
+    setIsEditing(false);
+    setEditingId(null);
+    setFormName('');
+    setFormSlug('');
+    setFormCategoryId('');
+    setFormPrice('');
+    setFormDescription('');
+    setFormImageUrl('');
+    setFormSuitableAges([]);
+    setFormStockStatus('in_stock');
+    setFormFeatured(false);
+    setFormNewArrival(false);
+    setIsModalOpen(false);
+  };
+
+  const handleOpenAdd = () => {
+    resetForm();
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (p: Product) => {
+    setIsEditing(true);
+    setEditingId(p.id);
+    setFormName(p.name);
+    setFormSlug(p.slug);
+    setFormCategoryId(p.category_id || '');
+    setFormPrice(p.price);
+    setFormDescription(p.description || '');
+    setFormImageUrl(p.image_url || '');
+    setFormSuitableAges(p.suitable_ages || []);
+    setFormStockStatus(p.stock_status);
+    setFormFeatured(p.featured);
+    setFormNewArrival(p.is_new_arrival);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    if (!isSupabaseConfigured()) { setErrorMsg('Supabase not configured'); return; }
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
+      setSuccessMsg(`"${name}" deleted.`);
+      setTimeout(() => setSuccessMsg(null), 3000);
+      fetchData();
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Failed to delete');
+    }
+  };
+
+  const toggleAge = (age: string) => {
+    setFormSuitableAges((prev) =>
+      prev.includes(age) ? prev.filter((a) => a !== age) : [...prev, age]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setSaving(true);
+
+    if (!isSupabaseConfigured()) {
+      setErrorMsg('Supabase credentials not configured in .env.local');
+      setSaving(false);
+      return;
+    }
+
+    const slug = formSlug.trim() || formName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const payload = {
+      name: formName.trim(),
+      slug,
+      category_id: formCategoryId || null,
+      price: Number(formPrice) || 0,
+      description: formDescription.trim() || null,
+      image_url: formImageUrl.trim() || null,
+      suitable_ages: formSuitableAges,
+      stock_status: formStockStatus,
+      featured: formFeatured,
+      is_new_arrival: formNewArrival,
+      is_toy: true,
+      is_accessory: false,
+      updated_at: new Date().toISOString(),
+    };
+
+    try {
+      const supabase = createClient();
+      if (isEditing && editingId) {
+        const { data, error } = await supabase
+          .from('products')
+          .update(payload)
+          .eq('id', editingId)
+          .select();
+        if (error) throw new Error(error.message);
+        if (!data || data.length === 0)
+          throw new Error('Update blocked by RLS. Run the SQL from supabase/schema.sql in your Supabase Dashboard → SQL Editor.');
+        setSuccessMsg(`"${formName}" updated!`);
+      } else {
+        const { data, error } = await supabase.from('products').insert(payload).select();
+        if (error) throw new Error(error.message);
+        if (!data || data.length === 0)
+          throw new Error('Insert blocked by RLS. Run the SQL from supabase/schema.sql in your Supabase Dashboard → SQL Editor.');
+        setSuccessMsg(`"${formName}" added to toys!`);
+      }
+
+      resetForm();
+      fetchData();
+      setTimeout(() => setSuccessMsg(null), 3500);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Operation failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const filtered = toys.filter((t) =>
+    t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.slug.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="p-6 sm:p-10 max-w-7xl w-full mx-auto">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
+              <ToyBrick className="w-5 h-5" />
+            </div>
+            Toys Section
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Manage children&apos;s toys, plushies, Montessori sets, and developmental play products.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link
+            href="/shop"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0284C7] bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3.5 py-2.5 rounded-xl transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            View Shop
+          </Link>
+          <button
+            type="button"
+            onClick={handleOpenAdd}
+            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2.5 px-5 rounded-xl shadow-xs transition-all active:scale-[0.98]"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            Add Toy
+          </button>
+        </div>
+      </div>
+
+      {/* Messages */}
+      {errorMsg && (
+        <div className="my-4 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between text-xs text-rose-700">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+          <button type="button" onClick={() => setErrorMsg(null)}><X className="w-3.5 h-3.5" /></button>
+        </div>
+      )}
+      {successMsg && (
+        <div className="my-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-700">
+          <div className="flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+          <button type="button" onClick={() => setSuccessMsg(null)}><X className="w-3.5 h-3.5" /></button>
+        </div>
+      )}
+
+      {/* Search */}
+      <div className="my-6 relative max-w-md">
+        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search toys..."
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-emerald-400 shadow-2xs"
+        />
+        {searchQuery && (
+          <button type="button" onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+
+      {/* Grid */}
+      {loading ? (
+        <div className="p-16 text-center flex flex-col items-center gap-3 text-slate-400">
+          <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+          <span className="text-xs font-medium">Loading toys...</span>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col items-center gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-3xl">🧸</div>
+          <div>
+            <p className="text-sm font-bold text-slate-800">
+              {searchQuery ? 'No toys match your search' : 'No toys added yet'}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              Click "Add Toy" to add plushies, Montessori toys, rattles and more.
+            </p>
+          </div>
+          {!searchQuery && (
+            <button
+              type="button"
+              onClick={handleOpenAdd}
+              className="mt-2 inline-flex items-center gap-2 bg-emerald-600 text-white font-bold text-xs py-2 px-4 rounded-xl"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add First Toy
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {filtered.map((t) => (
+            <div
+              key={t.id}
+              className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex flex-col justify-between hover:shadow-md transition-all group h-full"
+            >
+              <div>
+                {/* Image */}
+                <div className="relative w-full aspect-square rounded-xl bg-slate-100 overflow-hidden mb-3 border border-slate-100 flex items-center justify-center">
+                  {t.image_url ? (
+                    <Image
+                      src={t.image_url}
+                      alt={t.name}
+                      fill
+                      unoptimized
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-slate-400 gap-1">
+                      <span className="text-3xl">🧸</span>
+                      <span className="text-[11px] font-semibold">No image</span>
+                    </div>
+                  )}
+                  <div className="absolute top-2 left-2">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shadow-2xs ${
+                      t.stock_status === 'in_stock' ? 'bg-emerald-500 text-white'
+                      : t.stock_status === 'low_stock' ? 'bg-amber-500 text-white'
+                      : 'bg-rose-500 text-white'
+                    }`}>
+                      {t.stock_status === 'in_stock' ? 'In Stock' : t.stock_status === 'low_stock' ? 'Low Stock' : 'Out of Stock'}
+                    </span>
+                  </div>
+                  <div className="absolute top-2 right-2">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white shadow-2xs">
+                      <ToyBrick className="w-2.5 h-2.5" />
+                      Toy
+                    </span>
+                  </div>
+                </div>
+
+                {/* Info */}
+                <div className="flex items-start justify-between gap-1 mb-1">
+                  <h3 className="font-bold text-sm text-slate-900 group-hover:text-emerald-600 transition-colors line-clamp-2 min-h-[36px] sm:min-h-[40px] leading-snug" title={t.name}>
+                    {t.name}
+                  </h3>
+                  <span className="text-xs font-black text-[#0F172A] shrink-0 mt-0.5">₹{Number(t.price).toLocaleString()}</span>
+                </div>
+
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                    {t.categories?.name || 'Uncategorized'}
+                  </span>
+                  {t.is_new_arrival && (
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" />New
+                    </span>
+                  )}
+                </div>
+
+                {t.suitable_ages && t.suitable_ages.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {t.suitable_ages.slice(0, 2).map((age) => (
+                      <span key={age} className="text-[9px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded">
+                        {age}
+                      </span>
+                    ))}
+                    {t.suitable_ages.length > 2 && <span className="text-[9px] text-slate-400">+{t.suitable_ages.length - 2}</span>}
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between gap-1.5 pt-3 mt-3 border-t border-slate-100">
+                <Link
+                  href={`/product/${t.slug}`}
+                  target="_blank"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-[#0284C7] transition-colors"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Store
+                </Link>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleEdit(t)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-[#0284C7] bg-slate-50 hover:bg-sky-50 px-2.5 py-1.5 rounded-lg transition-colors border border-slate-200/80"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(t.id, t.name)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-2xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 flex flex-col">
+            {/* Header */}
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div>
+                <h2 className="text-lg font-extrabold text-slate-900">
+                  {isEditing ? `Edit: ${formName}` : 'Add New Toy'}
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  This item will be tagged as a Toy and appear in the toys section.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Left */}
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Toy Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formName}
+                      onChange={(e) => {
+                        setFormName(e.target.value);
+                        if (!isEditing) setFormSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+                      }}
+                      placeholder="e.g. Wooden Stacking Rings"
+                      className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:border-emerald-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">URL Slug *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formSlug}
+                      onChange={(e) => setFormSlug(e.target.value)}
+                      placeholder="e.g. wooden-stacking-rings"
+                      className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:border-emerald-400"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Category</label>
+                      <select
+                        value={formCategoryId}
+                        onChange={(e) => setFormCategoryId(e.target.value)}
+                        className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:border-emerald-400"
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Price (₹) *</label>
+                      <input
+                        type="number"
+                        required
+                        step="0.01"
+                        value={formPrice}
+                        onChange={(e) => setFormPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                        placeholder="e.g. 349"
+                        className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:border-emerald-400"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Stock Status</label>
+                    <select
+                      value={formStockStatus}
+                      onChange={(e) => setFormStockStatus(e.target.value as 'in_stock' | 'out_of_stock' | 'low_stock')}
+                      className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:border-emerald-400"
+                    >
+                      <option value="in_stock">In Stock (Available)</option>
+                      <option value="low_stock">Low Stock (Hurry)</option>
+                      <option value="out_of_stock">Out of Stock</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Description</label>
+                    <textarea
+                      rows={3}
+                      value={formDescription}
+                      onChange={(e) => setFormDescription(e.target.value)}
+                      placeholder="BPA-free wooden rings that help develop motor skills..."
+                      className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:border-emerald-400"
+                    />
+                  </div>
+                </div>
+
+                {/* Right */}
+                <div className="flex flex-col gap-4">
+                  <ImageUploader
+                    label="Toy Photo"
+                    value={formImageUrl}
+                    onChange={setFormImageUrl}
+                    aspectRatio="aspect-square"
+                    hint="Upload a clear photo of the toy."
+                  />
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">Suitable Age Groups</label>
+                    <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1 border border-slate-200 rounded-xl bg-slate-50">
+                      {AGE_GROUP_OPTIONS.map((age) => {
+                        const isSelected = formSuitableAges.includes(age);
+                        return (
+                          <button
+                            key={age}
+                            type="button"
+                            onClick={() => toggleAge(age)}
+                            className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
+                              isSelected
+                                ? 'bg-emerald-600 text-white shadow-2xs'
+                                : 'bg-white text-slate-600 border border-slate-200 hover:border-emerald-300'
+                            }`}
+                          >
+                            {isSelected ? '✓ ' : ''}{age}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-2.5">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formNewArrival}
+                        onChange={(e) => setFormNewArrival(e.target.checked)}
+                        className="w-4 h-4 rounded accent-emerald-600"
+                      />
+                      <span className="text-xs font-bold text-slate-700">Mark as New Arrival</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formFeatured}
+                        onChange={(e) => setFormFeatured(e.target.checked)}
+                        className="w-4 h-4 rounded accent-emerald-600"
+                      />
+                      <span className="text-xs font-bold text-slate-700">Featured Product</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 mt-2">
+                <button type="button" onClick={resetForm} className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2.5 px-6 rounded-xl flex items-center gap-2 transition-all disabled:opacity-50 shadow-xs"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  <span>{isEditing ? 'Save Changes' : 'Add Toy'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
