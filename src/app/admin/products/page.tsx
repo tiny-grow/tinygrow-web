@@ -18,6 +18,7 @@ import { Product, Category, AGE_GROUP_OPTIONS } from '@/lib/supabase/types';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import ImageUploader from '@/components/admin/ImageUploader';
 import { ToastContainer, useToast } from '@/components/admin/Toast';
+import { deleteMediaUrls } from '@/lib/mediaUtils';
 
 const DRESS_TYPES = [
   'Casual Dresses',
@@ -197,6 +198,9 @@ export default function AdminDressesPage() {
       return;
     }
 
+    const itemToDelete = products.find((p) => p.id === id);
+    const imageUrl = itemToDelete?.image_url;
+
     try {
       const supabase = createClient();
       const { error } = await supabase.from('products').delete().eq('id', id);
@@ -205,6 +209,12 @@ export default function AdminDressesPage() {
         setErrorMsg(error.message);
         addToast(error.message, 'error');
       } else {
+        // Also delete image from Cloudinary and Supabase storage
+        if (imageUrl) {
+          deleteMediaUrls([imageUrl]).catch((delErr) =>
+            console.warn('Failed to delete image from Cloudinary:', delErr)
+          );
+        }
         addToast(`Dress "${name}" deleted successfully!`, 'success');
         fetchData();
       }

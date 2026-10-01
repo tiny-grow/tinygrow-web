@@ -19,6 +19,7 @@ import { Product, Category, AGE_GROUP_OPTIONS } from '@/lib/supabase/types';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import ImageUploader from '@/components/admin/ImageUploader';
 import { ToastContainer, useToast } from '@/components/admin/Toast';
+import { deleteMediaUrls } from '@/lib/mediaUtils';
 
 export default function AdminToysPage() {
   const [toys, setToys] = useState<Product[]>([]);
@@ -148,10 +149,20 @@ export default function AdminToysPage() {
     if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
     if (!isSupabaseConfigured()) { setErrorMsg('Supabase not configured'); return; }
 
+    const itemToDelete = toys.find((p) => p.id === id);
+    const imageUrl = itemToDelete?.image_url;
+
     try {
       const supabase = createClient();
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
+
+      if (imageUrl) {
+        deleteMediaUrls([imageUrl]).catch((delErr) =>
+          console.warn('Failed to delete image from Cloudinary:', delErr)
+        );
+      }
+
       addToast(`"${name}" deleted successfully!`, 'success');
       fetchData();
     } catch (err: unknown) {
