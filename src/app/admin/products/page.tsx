@@ -240,9 +240,17 @@ export default function AdminProductsPage() {
   };
 
   const filteredProducts = products.filter((p) => {
-    const matchesSearch =
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.slug.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase().trim();
+    let matchesSearch = true;
+    if (q) {
+      const qWords = q.split(/\s+/).filter(Boolean);
+      const name = p.name?.toLowerCase() || '';
+      const slug = p.slug?.toLowerCase() || '';
+      const desc = p.description?.toLowerCase() || '';
+      const catName = (p.categories as any)?.name?.toLowerCase() || '';
+      const fullText = `${name} ${slug} ${desc} ${catName}`;
+      matchesSearch = qWords.every((w) => fullText.includes(w));
+    }
     const matchesCategory =
       categoryFilter === 'all'
         ? true
@@ -275,7 +283,7 @@ export default function AdminProductsPage() {
             className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0284C7] bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3.5 py-2.5 rounded-xl transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-            <span>View Shop ↗</span>
+            <span>View Shop</span>
           </Link>
           <button
             type="button"
@@ -407,8 +415,14 @@ export default function AdminProductsPage() {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center text-slate-400 gap-1">
-                      <span className="text-3xl">🧸</span>
+                    <div className="flex flex-col items-center justify-center text-slate-400 gap-1.5">
+                      {p.is_toy ? (
+                        <ToyBrick className="w-8 h-8 text-emerald-400" strokeWidth={1.5} />
+                      ) : p.is_accessory ? (
+                        <Tag className="w-8 h-8 text-violet-400" strokeWidth={1.5} />
+                      ) : (
+                        <ShoppingBag className="w-8 h-8 text-pink-400" strokeWidth={1.5} />
+                      )}
                       <span className="text-[11px] font-semibold">No image</span>
                     </div>
                   )}
@@ -677,14 +691,14 @@ export default function AdminProductsPage() {
                             key={age}
                             type="button"
                             onClick={() => toggleAge(age)}
-                            className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
+                            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
                               isSelected
                                 ? 'bg-[#FB7185] text-white shadow-2xs'
                                 : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
                             }`}
                           >
-                            {isSelected ? '✓ ' : ''}
-                            {age}
+                            {isSelected && <Check className="w-3 h-3 stroke-[2.5]" />}
+                            <span>{age}</span>
                           </button>
                         );
                       })}

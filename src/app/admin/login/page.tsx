@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, Lock, Mail, AlertCircle, Loader2, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, AlertCircle, Loader2, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 
 function LoginForm() {
@@ -74,16 +75,25 @@ function LoginForm() {
           WebkitBackdropFilter: 'blur(24px)',
         }}
       >
-        {/* Logo / Brand */}
+        {/* Logo / Brand with Exact Logo */}
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#FB7185] to-[#F43F5E] flex items-center justify-center text-3xl shadow-xl shadow-pink-500/30 mb-4">
-            🌱
+          <div className="bg-white rounded-2xl px-6 py-3 shadow-xl shadow-pink-500/20 mb-4 inline-flex items-center justify-center border border-white/20">
+            <div className="relative h-14 w-48">
+              <Image
+                src="/tinygrow-logo.png"
+                alt="TinyGrow Logo"
+                fill
+                sizes="180px"
+                priority
+                className="object-contain object-center"
+              />
+            </div>
           </div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">
-            TinyGrow Admin
+          <h1 className="text-xl font-extrabold text-white tracking-tight">
+            Admin Portal
           </h1>
-          <p className="text-sm text-slate-400 mt-1.5 flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <p className="text-xs sm:text-sm text-slate-400 mt-1.5 flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             Secure store management portal
           </p>
         </div>
@@ -175,9 +185,10 @@ function LoginForm() {
       <div className="text-center mt-5">
         <a
           href="/"
-          className="text-xs text-slate-500 hover:text-slate-300 transition-colors inline-flex items-center gap-1.5"
+          className="text-xs text-slate-400 hover:text-white transition-colors inline-flex items-center gap-1.5 font-medium"
         >
-          ← Back to TinyGrow storefront
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to TinyGrow storefront</span>
         </a>
       </div>
     </div>

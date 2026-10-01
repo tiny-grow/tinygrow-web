@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { Upload, Link2, X, Loader2, ImageIcon, Check, RefreshCw } from 'lucide-react';
+import { Upload, Link2, X, Loader2, ImageIcon, Check, RefreshCw, AlertCircle } from 'lucide-react';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 
 interface ImageUploaderProps {
@@ -282,8 +282,9 @@ export default function ImageUploader({
 
       {/* Error message */}
       {error && (
-        <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1">
-          <span>⚠</span> {error}
+        <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1.5">
+          <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+          <span>{error}</span>
         </p>
       )}
 
