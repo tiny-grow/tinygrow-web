@@ -13,6 +13,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/favicon.ico',
+        destination: '/tinygrow-favicon.png',
+      },
+      {
+        source: '/favicon.png',
+        destination: '/tinygrow-favicon.png',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
