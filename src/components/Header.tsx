@@ -371,7 +371,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-white border-b border-slate-100 px-4 sm:px-8 py-3.5 sm:py-4 relative z-40">
+    <header className="w-full bg-white border-b border-slate-100 px-4 sm:px-8 py-2 sm:py-2.5 relative z-40">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 lg:gap-8">
         {/* Brand Logo */}
         <div className="flex-shrink-0">
