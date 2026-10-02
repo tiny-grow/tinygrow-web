@@ -14,12 +14,12 @@ export const metadata: Metadata = {
     "Discover adorable and gentle baby clothing, little accessories, and joyful toys made with love and safety for your little ones.",
   icons: {
     icon: [
-      { url: "/favicon.png", type: "image/png" },
+      { url: "/tinygrow-favicon.png", type: "image/png" },
     ],
     apple: [
-      { url: "/favicon.png", type: "image/png" },
+      { url: "/tinygrow-favicon.png", type: "image/png" },
     ],
-    shortcut: "/favicon.png",
+    shortcut: "/tinygrow-favicon.png",
   },
 };
 
@@ -30,6 +30,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={jakartaSans.variable} suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/tinygrow-favicon.png" type="image/png" />
+        <link rel="shortcut icon" href="/tinygrow-favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/tinygrow-favicon.png" />
+      </head>
       <body
         className="min-h-screen bg-white text-[#0F172A] font-sans antialiased selection:bg-[#FCE7F3] selection:text-[#BE185D]"
         suppressHydrationWarning
