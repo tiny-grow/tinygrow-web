@@ -39,6 +39,14 @@ export async function generateMetadata(
   return {
     title,
     description,
+    keywords: [
+      product.name,
+      'baby clothes',
+      'buy online',
+      'TinyGrow',
+      product.is_toy ? 'baby toy' : 'baby apparel',
+      product.is_accessory ? 'baby accessory' : 'baby wear',
+    ],
     openGraph: {
       title,
       description,

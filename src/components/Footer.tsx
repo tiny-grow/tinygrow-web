@@ -248,8 +248,8 @@ export default function Footer({ contact, socials = [] }: FooterProps) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/shipping-policy" className="hover:text-[#0284C7] transition-colors inline-block hover:translate-x-1 duration-200">
-                    Shipping Policy
+                  <Link href="/privacy-policy" className="hover:text-[#0284C7] transition-colors inline-block hover:translate-x-1 duration-200">
+                    Privacy Policy
                   </Link>
                 </li>
                 <li>

@@ -13,6 +13,31 @@ import {
 import { searchAndRankProducts } from '@/lib/searchUtils';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const categories = await getCategories();
+  const currentCategory = categories.find((c) => c.slug === slug);
+  const name = currentCategory?.name || (slug.charAt(0).toUpperCase() + slug.slice(1));
+  const desc = currentCategory?.description || `Shop premium baby ${name.toLowerCase()} at TinyGrow. 100% baby-safe and organic quality.`;
+
+  return {
+    title: `${name} | TinyGrow Baby Store`,
+    description: desc,
+    keywords: [
+      `baby ${name.toLowerCase()}`,
+      `buy baby ${name.toLowerCase()} online`,
+      'organic baby clothes',
+      'TinyGrow baby store',
+    ],
+    openGraph: {
+      title: `${name} | TinyGrow`,
+      description: desc,
+      images: currentCategory?.image_url ? [{ url: currentCategory.image_url }] : [],
+    },
+  };
+}
 
 export const revalidate = 0;
 

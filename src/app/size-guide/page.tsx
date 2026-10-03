@@ -7,8 +7,14 @@ import Link from 'next/link';
 import { Ruler, Sparkles, MessageCircle, HelpCircle, ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Baby Size Guide | TinyGrow',
+  title: 'Baby Size Guide | TinyGrow Clothing & Shoes Chart',
   description: 'Detailed size and measurement charts for baby onesies, frocks, sleepsuits, and booties to find the perfect fit.',
+  keywords: [
+    'baby clothing size chart',
+    'newborn sizing guide India',
+    'infant dress sizes',
+    'baby shoe bootie size guide',
+  ],
 };
 
 export const revalidate = 0;
