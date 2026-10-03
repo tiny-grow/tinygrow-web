@@ -12,6 +12,20 @@ import { searchAndRankProducts } from '@/lib/searchUtils';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { X, Search } from 'lucide-react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Shop All Baby Clothes, Toys & Accessories',
+  description:
+    'Explore our complete collection of certified organic baby frocks, cute accessories, and developmental Montessori toys at TinyGrow.',
+  keywords: [
+    'shop baby clothes online',
+    'buy organic baby dresses',
+    'cute baby accessories online',
+    'Montessori baby toys India',
+    'TinyGrow collection',
+  ],
+};
 
 export const revalidate = 0;
 

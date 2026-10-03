@@ -10,6 +10,12 @@ import { Heart, Sparkles, ShieldCheck, Leaf, ArrowRight, Smile } from 'lucide-re
 export const metadata: Metadata = {
   title: 'About Us | TinyGrow - Little Moments, Made to Grow',
   description: 'Learn about TinyGrow, our gentle organic baby garments, safe playful toys, and passion for newborn comfort.',
+  keywords: [
+    'about TinyGrow',
+    'organic baby brand India',
+    'baby clothing company',
+    'sustainable baby products',
+  ],
 };
 
 export const revalidate = 0;
