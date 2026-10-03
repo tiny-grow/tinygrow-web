@@ -9,6 +9,11 @@ import { RotateCcw, ShieldCheck, MessageCircle, CheckCircle2, Clock, AlertCircle
 export const metadata: Metadata = {
   title: 'Returns & Exchanges Policy | TinyGrow',
   description: 'Learn about TinyGrow 7-day hassle-free returns and exchanges for organic baby clothing and essentials.',
+  keywords: [
+    'baby clothes return policy',
+    'easy babywear exchange',
+    'TinyGrow customer care',
+  ],
 };
 
 export const revalidate = 0;

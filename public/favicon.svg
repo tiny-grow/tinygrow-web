@@ -1,3 +1,77 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" width="100%" height="100%">
-  <image href="/tinygrow-favicon.png" width="512" height="512" preserveAspectRatio="xMidYMid meet" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Badge Gradient -->
+    <radialGradient id="bgGrad" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="30%" stop-color="#F3F9FE" />
+      <stop offset="70%" stop-color="#E2F2FD" />
+      <stop offset="100%" stop-color="#CFE7FB" />
+    </radialGradient>
+
+    <!-- Border Ring Gradient -->
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#93C5FD" />
+      <stop offset="100%" stop-color="#F472B6" />
+    </linearGradient>
+
+    <!-- Top Gloss Highlight -->
+    <linearGradient id="glossGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Blue Text Bubble Gradient -->
+    <linearGradient id="blueBubble" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#0369A1" />
+    </linearGradient>
+
+    <!-- Pink Paw Bubble Gradient -->
+    <linearGradient id="pinkBubble" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FB7185" />
+      <stop offset="50%" stop-color="#F43F5E" />
+      <stop offset="100%" stop-color="#E11D48" />
+    </linearGradient>
+
+    <!-- Drop Shadow Filter -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.18" />
+    </filter>
+  </defs>
+
+  <!-- Circular Badge Base -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGrad)" stroke="url(#ringGrad)" stroke-width="14" filter="url(#dropShadow)" />
+
+  <!-- Gloss Reflection Arc -->
+  <path d="M 90,180 A 210,210 0 0,1 422,180 A 240,190 0 0,0 90,180 Z" fill="url(#glossGrad)" />
+
+  <!-- Bottom Soft Pastel Glows -->
+  <circle cx="160" cy="380" r="120" fill="#BAE6FD" opacity="0.35" />
+  <circle cx="360" cy="370" r="110" fill="#FBCFE8" opacity="0.4" />
+
+  <!-- Pink Paw Print (Right) -->
+  <g id="paw-print">
+    <!-- Center Pad with Heart Cutout -->
+    <circle cx="365" cy="305" r="54" fill="url(#pinkBubble)" />
+    <!-- Heart in center of pad -->
+    <path d="M 365,316 C 365,316 350,302 350,292 C 350,285 355,280 361,280 C 364,280 365,283 365,283 C 365,283 366,280 369,280 C 375,280 380,285 380,292 C 380,302 365,316 365,316 Z" fill="#FFFFFF" />
+
+    <!-- Toe 1 -->
+    <ellipse cx="318" cy="245" rx="17" ry="24" transform="rotate(-30 318 245)" fill="url(#pinkBubble)" />
+    <!-- Toe 2 -->
+    <ellipse cx="355" cy="215" rx="19" ry="26" transform="rotate(-8 355 215)" fill="url(#pinkBubble)" />
+    <!-- Toe 3 -->
+    <ellipse cx="400" cy="225" rx="18" ry="25" transform="rotate(18 400 225)" fill="url(#pinkBubble)" />
+    <!-- Toe 4 -->
+    <ellipse cx="432" cy="270" rx="16" ry="23" transform="rotate(40 432 270)" fill="url(#pinkBubble)" />
+  </g>
+
+  <!-- Blue Heart above 'i' -->
+  <path d="M 195,178 C 195,178 178,162 178,150 C 178,141 184,135 191,135 C 195,135 195,138 195,138 C 195,138 195,135 199,135 C 206,135 212,141 212,150 C 212,162 195,178 195,178 Z" fill="url(#blueBubble)" />
+
+  <!-- TinyGrow Bubble Lettering (Left) -->
+  <text x="75" y="248" font-family="system-ui, -apple-system, 'Plus Jakarta Sans', 'Fredoka', 'Quicksand', 'Arial Rounded MT Bold', sans-serif" font-weight="900" font-size="112" fill="url(#blueBubble)" letter-spacing="-3" stroke="#FFFFFF" stroke-width="4" paint-order="stroke fill">Tiny</text>
+  <text x="68" y="348" font-family="system-ui, -apple-system, 'Plus Jakarta Sans', 'Fredoka', 'Quicksand', 'Arial Rounded MT Bold', sans-serif" font-weight="900" font-size="108" fill="url(#blueBubble)" letter-spacing="-3" stroke="#FFFFFF" stroke-width="4" paint-order="stroke fill">Grow</text>
 </svg>

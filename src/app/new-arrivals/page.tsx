@@ -9,6 +9,19 @@ import {
 } from '@/lib/supabase/queries';
 import Link from 'next/link';
 import { Sparkles, ArrowLeft } from 'lucide-react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'New Arrivals | Latest Baby Clothes, Toys & Accessories',
+  description:
+    'Discover the newest organic baby outfits, seasonal dresses, fresh Montessori toys, and gentle baby accessories at TinyGrow.',
+  keywords: [
+    'new baby clothing arrivals',
+    'latest newborn dresses',
+    'new baby toys online',
+    'TinyGrow new collection',
+  ],
+};
 
 export const revalidate = 0;
 

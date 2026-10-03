@@ -9,6 +9,21 @@ import {
   getSocialLinks,
 } from '@/lib/supabase/queries';
 
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Baby Dresses & Frocks | Organic Cotton Babywear',
+  description:
+    'Shop ultra-soft, breathable baby dresses, pastel frocks, and newborn onesies made with 100% certified organic cotton at TinyGrow.',
+  keywords: [
+    'baby dresses online',
+    'baby frocks India',
+    'organic baby clothes',
+    'cotton onesies for newborn',
+    'infant party dresses',
+  ],
+};
+
 export const revalidate = 0;
 
 export default async function DressesPage() {
