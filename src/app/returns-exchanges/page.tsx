@@ -8,11 +8,12 @@ import { RotateCcw, ShieldCheck, MessageCircle, CheckCircle2, Clock, AlertCircle
 
 export const metadata: Metadata = {
   title: 'Returns & Exchanges Policy | TinyGrow',
-  description: 'Learn about TinyGrow 7-day hassle-free returns and exchanges for organic baby clothing and essentials.',
+  description: 'Learn about TinyGrow simple 24-hour return request policy with 360° box opening video for baby clothing and essentials.',
   keywords: [
     'baby clothes return policy',
     'easy babywear exchange',
     'TinyGrow customer care',
+    '360 box opening video return',
   ],
 };
 
@@ -41,11 +42,11 @@ export default async function ReturnsExchangesPage() {
               <span>Customer Care</span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight mb-3">
-              Returns &amp; Exchanges Policy
+              24-Hour Return Request Policy
             </h1>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
               We want you and your little one to be 100% delighted with every TinyGrow purchase.
-              Enjoy our gentle, hassle-free 7-day return window.
+              Return requests must be submitted within 24 hours of delivery accompanied by an uncut 360° box opening video.
             </p>
           </div>
 
@@ -53,18 +54,18 @@ export default async function ReturnsExchangesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
             <div className="p-4 rounded-2xl bg-[#FFF1F2] border border-pink-100 flex flex-col items-center text-center">
               <Clock className="w-6 h-6 text-[#FB7185] mb-2" />
-              <h2 className="text-sm font-bold text-slate-900 mb-1">7-Day Window</h2>
-              <p className="text-xs text-slate-600">Request return or exchange within 7 days of delivery.</p>
+              <h2 className="text-sm font-bold text-slate-900 mb-1">24-Hour Window</h2>
+              <p className="text-xs text-slate-600">Submit your return request within 24 hours of package delivery.</p>
             </div>
             <div className="p-4 rounded-2xl bg-[#F0F9FF] border border-sky-100 flex flex-col items-center text-center">
               <ShieldCheck className="w-6 h-6 text-[#0284C7] mb-2" />
-              <h2 className="text-sm font-bold text-slate-900 mb-1">Doorstep Pickup</h2>
-              <p className="text-xs text-slate-600">We arrange reverse pickup right from your home address.</p>
+              <h2 className="text-sm font-bold text-slate-900 mb-1">360° Opening Video</h2>
+              <p className="text-xs text-slate-600">A clear, uncut 360° box opening video is mandatory for processing.</p>
             </div>
             <div className="p-4 rounded-2xl bg-[#ECFDF5] border border-emerald-100 flex flex-col items-center text-center">
               <CheckCircle2 className="w-6 h-6 text-emerald-600 mb-2" />
-              <h2 className="text-sm font-bold text-slate-900 mb-1">Instant Refund</h2>
-              <p className="text-xs text-slate-600">Refunds credited directly via UPI or your original method.</p>
+              <h2 className="text-sm font-bold text-slate-900 mb-1">Quick Resolution</h2>
+              <p className="text-xs text-slate-600">Prompt verification and refund or replacement via WhatsApp support.</p>
             </div>
           </div>
 
@@ -73,26 +74,27 @@ export default async function ReturnsExchangesPage() {
             <section>
               <h2 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-3 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#FB7185]" />
-                1. Eligibility for Returns &amp; Exchanges
+                1. Eligibility &amp; Mandatory 360° Box Opening Video
               </h2>
-              <p className="mb-2">To qualify for a return or size exchange, products must meet the following criteria:</p>
+              <p className="mb-2">To qualify for a return or exchange, requests must strictly meet the following guidelines:</p>
               <ul className="list-disc pl-6 space-y-1.5 text-slate-600">
+                <li><strong>24-Hour Timeline:</strong> The return request must be submitted within 24 hours of receiving the package.</li>
+                <li><strong>360° Box Opening Video:</strong> A continuous, uncut 360° video recorded from all angles of the parcel showing the shipping label, package condition before opening, and the unboxing process is required.</li>
                 <li>Items must be unworn, unwashed, and undamaged with all original tags attached.</li>
                 <li>Products must remain in their original baby-safe packaging.</li>
-                <li>Request must be raised within 7 calendar days of receipt.</li>
               </ul>
             </section>
 
             <section>
               <h2 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-3 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#FB7185]" />
-                2. How to Initiate a Return or Exchange
+                2. How to Initiate a Return Request
               </h2>
               <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-3">
                 <p className="font-semibold text-slate-900">Follow these 3 easy steps:</p>
                 <ol className="list-decimal pl-5 space-y-2 text-slate-600 text-sm">
                   <li>
-                    <strong>Message our WhatsApp Team:</strong> Send a quick WhatsApp to{' '}
+                    <strong>Message our WhatsApp Team within 24 hours:</strong> Send a quick WhatsApp to{' '}
                     <a
                       href={`https://api.whatsapp.com/send?phone=${cleanPhone}`}
                       target="_blank"
@@ -101,13 +103,13 @@ export default async function ReturnsExchangesPage() {
                     >
                       {contactInfo?.whatsapp_number || '+91 79947 02567'}
                     </a>{' '}
-                    with your Order ID/Receipt and photo of the item.
+                    along with your Order ID and the 360° box opening video.
                   </li>
                   <li>
-                    <strong>Reverse Pickup:</strong> Our delivery partner will pick up the package from your doorstep within 24–48 hours.
+                    <strong>Video Verification:</strong> Our customer support team will quickly review the video and approve the return request.
                   </li>
                   <li>
-                    <strong>Exchange or Refund:</strong> Once inspected, we will dispatch your replacement size or issue a full refund within 24 hours.
+                    <strong>Pickup &amp; Refund:</strong> We coordinate the doorstep pickup and process your replacement or refund promptly.
                   </li>
                 </ol>
               </div>
@@ -119,8 +121,8 @@ export default async function ReturnsExchangesPage() {
                 3. Damaged or Incorrect Items
               </h2>
               <p>
-                In the rare event that an item arrives defective, damaged, or incorrect, please notify us within 48 hours of delivery.
-                We will send an immediate free replacement with express shipping at zero extra cost.
+                In the rare event that an item arrives defective, damaged, or incorrect, please reach out via WhatsApp with your 360° box opening video within 24 hours of delivery.
+                We will dispatch an immediate replacement at zero extra cost.
               </p>
             </section>
 

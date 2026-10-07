@@ -92,7 +92,7 @@ export default function ProductOrderPanel({
       `• *Age / Size:* ${selectedAge}`,
       `• *Quantity:* ${quantity}`,
       `• *Price:* ₹${totalAmount} (${quantity} × ₹${unitPrice})`,
-      `• *Shipping:* FREE Delivery Across India`,
+      `• *Shipping:* Delivery Across PAN India`,
       '================================',
       '🔗 *Product Link:*',
       productUrl,

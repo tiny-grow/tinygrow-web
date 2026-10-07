@@ -121,7 +121,7 @@ export default async function HomePage() {
     getPromotions(),
   ]);
 
-  const displayProducts = getMixedProducts(products, 5);
+  const displayProducts = getMixedProducts(products, 10);
 
   return (
     <div className="min-h-screen bg-white flex flex-col w-full">
