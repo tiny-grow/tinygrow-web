@@ -158,8 +158,8 @@ export default function CartView({ contact }: CartViewProps) {
       '📦 *ITEMS ORDERED:*',
       itemLines.join('\n\n'),
       '================================',
-      `💰 *Subtotal:* ₹${subtotal.toLocaleString('en-IN')}`,
-      `🚚 *Shipping:* FREE Delivery Across India`,
+      `• *Subtotal:* ₹${subtotal.toLocaleString('en-IN')}`,
+      `🚚 *Shipping:* Delivery Across PAN India`,
       `✨ *Grand Total:* ₹${grandTotal.toLocaleString('en-IN')}`,
       '================================',
       '💬 *Please confirm item availability and share UPI / payment details. Thank you!*',
@@ -287,16 +287,16 @@ export default function CartView({ contact }: CartViewProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           {/* ── Left Column: Items & Free Shipping Progress (col-span 7/8) ── */}
           <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-4">
-            {/* Free Delivery Banner */}
+            {/* Delivery Banner */}
             <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 text-xs sm:text-sm text-emerald-900 shadow-2xs">
               <div className="flex items-center gap-2.5 font-bold">
                 <Truck className="w-5 h-5 text-emerald-600 shrink-0" />
                 <span>
-                  🎉 <strong>FREE Delivery Across India</strong> on your order!
+                  🎉 <strong>Delivery Across PAN India</strong> on your order!
                 </span>
               </div>
               <span className="text-[11px] font-extrabold text-emerald-700 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
-                FREE
+                ACTIVE
               </span>
             </div>
 
@@ -530,7 +530,7 @@ export default function CartView({ contact }: CartViewProps) {
               </div>
               <div className="flex flex-col items-center gap-1">
                 <RotateCcw className="w-4 h-4 text-[#0284C7]" />
-                <span className="font-bold">7-Day Return</span>
+                <span className="font-bold">24h Return Request</span>
               </div>
             </div>
           </div>

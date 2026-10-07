@@ -11,11 +11,9 @@ import {
   ShieldCheck,
   Truck,
   RotateCcw,
-  Heart,
-  MessageCircle,
 } from 'lucide-react';
 import BrandLogo from './BrandLogo';
-import { InstagramIcon, FacebookIcon, PinterestIcon, YoutubeIcon, WhatsAppIcon } from './SocialIcons';
+import { InstagramIcon, FacebookIcon, WhatsAppIcon } from './SocialIcons';
 import { ContactInformation, SocialLink } from '@/lib/supabase/types';
 
 interface FooterProps {
@@ -47,12 +45,13 @@ export default function Footer({ contact, socials = [] }: FooterProps) {
   const cleanPhone = whatsappNumber.replace(/\D/g, '') || '917994702567';
   const email = contact?.email || 'support@tinygrow.com';
   const hours = contact?.business_hours || 'Mon - Sat, 9:00 AM - 7:00 PM';
-  const address = contact?.address || '123 Joyful Lane, Blossom Garden, City - 400001';
+  // Address: Only show if added from admin (no default placeholder)
+  const address = contact?.address?.trim() || '';
 
-  const instagramLink = socials.find((s) => s.platform?.toLowerCase() === 'instagram')?.url || 'https://instagram.com';
-  const facebookLink = socials.find((s) => s.platform?.toLowerCase() === 'facebook')?.url || 'https://facebook.com';
-  const pinterestLink = socials.find((s) => s.platform?.toLowerCase() === 'pinterest')?.url || 'https://pinterest.com';
-  const youtubeLink = socials.find((s) => s.platform?.toLowerCase() === 'youtube')?.url || 'https://youtube.com';
+  // Socials: Only show if added from admin, remove pinterest and youtube
+  const instagramLink = socials.find((s) => s.platform?.toLowerCase() === 'instagram')?.url?.trim() || '';
+  const facebookLink = socials.find((s) => s.platform?.toLowerCase() === 'facebook')?.url?.trim() || '';
+  const hasWhatsapp = Boolean(contact?.whatsapp_number && !contact.whatsapp_number.includes('98765'));
   const whatsappLink = `https://api.whatsapp.com/send?phone=${cleanPhone}`;
 
   return (
@@ -75,8 +74,8 @@ export default function Footer({ contact, socials = [] }: FooterProps) {
               <Truck className="w-5 h-5" />
             </div>
             <div className="text-center sm:text-left">
-              <h3 className="text-xs sm:text-sm font-bold text-[#0F172A]">Free Delivery</h3>
-              <p className="text-[11px] text-[#64748B]">Across all orders in India</p>
+              <h3 className="text-xs sm:text-sm font-bold text-[#0F172A]">Delivery Across PAN India</h3>
+              <p className="text-[11px] text-[#64748B]">Across all orders</p>
             </div>
           </div>
 
@@ -85,14 +84,14 @@ export default function Footer({ contact, socials = [] }: FooterProps) {
               <RotateCcw className="w-5 h-5" />
             </div>
             <div className="text-center sm:text-left">
-              <h3 className="text-xs sm:text-sm font-bold text-[#0F172A]">7-Day Easy Returns</h3>
-              <p className="text-[11px] text-[#64748B]">Doorstep reverse pickup</p>
+              <h3 className="text-xs sm:text-sm font-bold text-[#0F172A]">24-Hour Return Request</h3>
+              <p className="text-[11px] text-[#64748B]">With 360° box opening video</p>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2.5 p-2">
             <div className="w-10 h-10 rounded-2xl bg-emerald-100/70 text-[#25D366] flex items-center justify-center shrink-0 shadow-2xs">
-              <MessageCircle className="w-5 h-5 fill-current" />
+              <WhatsAppIcon className="w-5 h-5" />
             </div>
             <div className="text-center sm:text-left">
               <h3 className="text-xs sm:text-sm font-bold text-[#0F172A]">WhatsApp Ordering</h3>
@@ -112,60 +111,50 @@ export default function Footer({ contact, socials = [] }: FooterProps) {
               Thoughtfully curated organic baby garments, cheerful developmental toys, and gentle accessories tailored with love for every growing milestone.
             </p>
 
-            {/* Social Icons */}
-            <div className="mt-2">
-              <span className="text-[11px] font-bold text-[#0F2942] uppercase tracking-wider block mb-2.5">
-                Connect With Us
-              </span>
-              <div className="flex items-center gap-2">
-                <a
-                  href={whatsappLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white border border-[#D0E4F5] flex items-center justify-center text-[#25D366] hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-all shadow-2xs hover:scale-105"
-                  aria-label="WhatsApp"
-                  title="Chat on WhatsApp"
-                >
-                  <WhatsAppIcon className="w-4 h-4" />
-                </a>
-                <a
-                  href={instagramLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white border border-[#D0E4F5] flex items-center justify-center text-[#1E293B] hover:text-[#FB7185] hover:border-[#FB7185] transition-all shadow-2xs hover:scale-105"
-                  aria-label="Instagram"
-                >
-                  <InstagramIcon className="w-4 h-4" />
-                </a>
-                <a
-                  href={facebookLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white border border-[#D0E4F5] flex items-center justify-center text-[#1E293B] hover:text-[#0284C7] hover:border-[#0284C7] transition-all shadow-2xs hover:scale-105"
-                  aria-label="Facebook"
-                >
-                  <FacebookIcon className="w-4 h-4" />
-                </a>
-                <a
-                  href={pinterestLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white border border-[#D0E4F5] flex items-center justify-center text-[#1E293B] hover:text-rose-500 hover:border-rose-300 transition-all shadow-2xs hover:scale-105"
-                  aria-label="Pinterest"
-                >
-                  <PinterestIcon className="w-4 h-4" />
-                </a>
-                <a
-                  href={youtubeLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white border border-[#D0E4F5] flex items-center justify-center text-[#1E293B] hover:text-red-600 hover:border-red-300 transition-all shadow-2xs hover:scale-105"
-                  aria-label="YouTube"
-                >
-                  <YoutubeIcon className="w-4 h-4" />
-                </a>
+            {/* Social Icons (Only show if added from admin) */}
+            {(instagramLink || facebookLink || hasWhatsapp) && (
+              <div className="mt-2">
+                <span className="text-[11px] font-bold text-[#0F2942] uppercase tracking-wider block mb-2.5">
+                  Connect With Us
+                </span>
+                <div className="flex items-center gap-2">
+                  {hasWhatsapp && (
+                    <a
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-9 h-9 rounded-full bg-white border border-[#D0E4F5] flex items-center justify-center text-[#25D366] hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-all shadow-2xs hover:scale-105"
+                      aria-label="WhatsApp"
+                      title="Chat on WhatsApp"
+                    >
+                      <WhatsAppIcon className="w-4 h-4" />
+                    </a>
+                  )}
+                  {instagramLink && (
+                    <a
+                      href={instagramLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-9 h-9 rounded-full bg-white border border-[#D0E4F5] flex items-center justify-center text-[#1E293B] hover:text-[#FB7185] hover:border-[#FB7185] transition-all shadow-2xs hover:scale-105"
+                      aria-label="Instagram"
+                    >
+                      <InstagramIcon className="w-4 h-4" />
+                    </a>
+                  )}
+                  {facebookLink && (
+                    <a
+                      href={facebookLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-9 h-9 rounded-full bg-white border border-[#D0E4F5] flex items-center justify-center text-[#1E293B] hover:text-[#0284C7] hover:border-[#0284C7] transition-all shadow-2xs hover:scale-105"
+                      aria-label="Facebook"
+                    >
+                      <FacebookIcon className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Col 2: Shop Collections */}
@@ -211,11 +200,6 @@ export default function Footer({ contact, socials = [] }: FooterProps) {
                 <li>
                   <Link href="/shop" className="hover:text-[#FB7185] transition-colors inline-block hover:translate-x-1 duration-200">
                     All Products
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/shop?filter=offers" className="hover:text-[#FB7185] transition-colors inline-block hover:translate-x-1 duration-200">
-                    Special Offers
                   </Link>
                 </li>
               </ul>
@@ -359,18 +343,13 @@ export default function Footer({ contact, socials = [] }: FooterProps) {
           </div>
         </div>
 
-        {/* ── Bottom Bar: Copyright, Tagline & Crafted By ── */}
+        {/* ── Bottom Bar: Copyright & Crafted By ── */}
         <div className="pt-8 mt-8 border-t border-[#D6E8F6] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#64748B]">
           <div className="flex items-center gap-1.5 text-center sm:text-left">
             <span>&copy; {new Date().getFullYear()} TinyGrow. Little Moments, Made to Grow.</span>
           </div>
 
           <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-end text-xs text-[#64748B]">
-            <div className="flex items-center gap-1.5">
-              <span>Made with love for happy little smiles</span>
-              <Heart className="w-3.5 h-3.5 fill-[#FB7185] text-[#FB7185]" />
-            </div>
-            <span className="hidden sm:inline text-slate-300">•</span>
             <a
               href="https://www.ekodrix.com"
               target="_blank"

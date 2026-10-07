@@ -15,9 +15,9 @@ export default function AdminContactPage() {
   const [phone, setPhone] = useState('+91 79947 02567');
   const [whatsapp, setWhatsapp] = useState('917994702567');
   const [email, setEmail] = useState('support@tinygrow.com');
-  const [address, setAddress] = useState('123 Baby Blossom Lane, Care City');
+  const [address, setAddress] = useState('');
   const [businessHours, setBusinessHours] = useState('Mon - Sat, 9AM - 6PM');
-  const [announcementText, setAnnouncementText] = useState('Free Delivery Across India | Easy WhatsApp Ordering | 100% Baby-Safe Products');
+  const [announcementText, setAnnouncementText] = useState('Delivery Across PAN India | Easy WhatsApp Ordering | 100% Baby-Safe Products');
 
   useEffect(() => {
     const fetchContact = async () => {
@@ -44,8 +44,12 @@ export default function AdminContactPage() {
           setWhatsapp(c.whatsapp_number || '917994702567');
           setEmail(c.email || 'support@tinygrow.com');
           setAddress(c.address || '');
-          setBusinessHours(c.business_hours || 'Mon - Sat, 9AM - 6PM');
-          setAnnouncementText(c.announcement_text || 'Free Delivery Across India | Easy WhatsApp Ordering | 100% Baby-Safe Products');
+          setAnnouncementText(
+            (c.announcement_text || 'Delivery Across PAN India | Easy WhatsApp Ordering | 100% Baby-Safe Products')
+              .replace(/Free (Delivery|Shipping) Across (PAN )?India/gi, 'Delivery Across PAN India')
+              .replace(/on orders above ₹?999/gi, 'Across PAN India')
+              .replace(/Across India/gi, 'Across PAN India')
+          );
         }
       } catch (err: unknown) {
         setErrorMsg(err instanceof Error ? err.message : 'Error fetching contact settings');
@@ -207,7 +211,7 @@ export default function AdminContactPage() {
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="123 Baby Blossom Lane, Care City"
+                  placeholder="Store or warehouse address (Optional - leave blank to hide in footer)"
                   className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 pl-9 border border-slate-200 focus:outline-none focus:border-[#38BDF8]"
                 />
                 <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -223,7 +227,7 @@ export default function AdminContactPage() {
                   type="text"
                   value={announcementText}
                   onChange={(e) => setAnnouncementText(e.target.value)}
-                  placeholder="Free Delivery Across India | Easy WhatsApp Ordering | 100% Baby-Safe Products"
+                  placeholder="Delivery Across PAN India | Easy WhatsApp Ordering | 100% Baby-Safe Products"
                   className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 pl-9 border border-slate-200 focus:outline-none focus:border-[#38BDF8]"
                 />
                 <Megaphone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />

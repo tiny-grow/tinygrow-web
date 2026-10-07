@@ -27,7 +27,7 @@ interface DressesCatalogProps {
 }
 
 const CAT_STYLE_PALETTE = [
-  { bg: 'bg-[#FFF0F2]', border: 'border-[#FB7185]', iconColor: 'text-[#FB7185]', icon: ShoppingBag },
+  { bg: 'bg-[#FFF5F6]', border: 'border-pink-200/70', iconColor: 'text-pink-500', icon: ShoppingBag },
   { bg: 'bg-[#F0F7FD]', border: 'border-sky-100', iconColor: 'text-sky-500', icon: Layers },
   { bg: 'bg-[#FEF9E7]', border: 'border-amber-100', iconColor: 'text-amber-500', icon: Sparkles },
   { bg: 'bg-[#EFFBF9]', border: 'border-teal-100', iconColor: 'text-teal-500', icon: Heart },
@@ -333,12 +333,14 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
               onClick={() => setSelectedCategory('All Dresses')}
               className={`flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2.5 rounded-2xl border transition-all text-left w-full sm:w-auto ${
                 isActive
-                  ? 'border-[#FB7185] bg-[#FFF0F2] ring-2 ring-pink-200/50 shadow-xs'
-                  : `${allStyle.border} ${allStyle.bg} hover:border-slate-300`
+                  ? 'border-[#FB7185] bg-[#FFF0F2] ring-2 ring-[#FB7185]/40 shadow-xs'
+                  : 'border-slate-200/80 bg-white hover:border-slate-300'
               }`}
             >
-              <div className="w-7 h-7 shrink-0 rounded-xl flex items-center justify-center bg-white/70 shadow-2xs">
-                <AllIcon className={`w-4 h-4 ${allStyle.iconColor}`} />
+              <div className={`w-7 h-7 shrink-0 rounded-xl flex items-center justify-center shadow-2xs transition-colors ${
+                isActive ? 'bg-[#FB7185] text-white' : 'bg-pink-50 text-pink-500'
+              }`}>
+                <AllIcon className="w-4 h-4" />
               </div>
               <span className={`text-xs font-bold leading-tight truncate ${isActive ? 'text-[#FB7185]' : 'text-slate-700'}`}>
                 All Dresses
@@ -357,12 +359,14 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
               onClick={() => setSelectedCategory(label)}
               className={`flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2.5 rounded-2xl border transition-all text-left w-full sm:w-auto ${
                 isActive
-                  ? 'border-[#FB7185] bg-[#FFF0F2] ring-2 ring-pink-200/50 shadow-xs'
+                  ? 'border-[#FB7185] bg-[#FFF0F2] ring-2 ring-[#FB7185]/40 shadow-xs'
                   : `${style.border} ${style.bg} hover:border-slate-300`
               }`}
             >
-              <div className="w-7 h-7 shrink-0 rounded-xl flex items-center justify-center bg-white/70 shadow-2xs">
-                <CatIcon className={`w-4 h-4 ${style.iconColor}`} />
+              <div className={`w-7 h-7 shrink-0 rounded-xl flex items-center justify-center shadow-2xs transition-colors ${
+                isActive ? 'bg-[#FB7185] text-white' : 'bg-white/90'
+              }`}>
+                <CatIcon className={`w-4 h-4 ${isActive ? 'text-white' : style.iconColor}`} />
               </div>
               <span className={`text-xs font-bold leading-tight truncate ${isActive ? 'text-[#FB7185]' : 'text-slate-700'}`}>
                 {label}

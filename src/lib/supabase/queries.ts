@@ -13,19 +13,33 @@ export async function getCategories(): Promise<Category[]> {
   if (!isSupabaseServerConfigured()) return [];
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('categories')
       .select('*')
       .order('display_order', { ascending: true });
 
+    // If ordering failed (e.g. column missing or constraint), retry without order
+    if (error) {
+      const fallback = await supabase.from('categories').select('*');
+      if (fallback.data && !fallback.error) {
+        data = fallback.data;
+        error = null;
+      }
+    }
+
     if (error || !data) {
-      if (error) console.error('Error fetching categories:', error);
+      const msg = error?.message || error?.details || error?.hint;
+      if (msg) {
+        console.warn('Notice fetching categories:', msg);
+      }
       return [];
     }
     // Only exclude categories explicitly marked inactive (active === false)
     return (data as Category[]).filter((c) => c.active !== false);
   } catch (err) {
-    console.error('Error fetching categories:', err);
+    if (err instanceof Error) {
+      console.warn('Notice fetching categories:', err.message);
+    }
     return [];
   }
 }
