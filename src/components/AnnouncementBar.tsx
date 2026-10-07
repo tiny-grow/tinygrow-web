@@ -1,3 +1,5 @@
+'use client';
+
 import { Truck } from 'lucide-react';
 
 interface AnnouncementBarProps {
@@ -5,10 +7,18 @@ interface AnnouncementBarProps {
 }
 
 export default function AnnouncementBar({ text }: AnnouncementBarProps) {
-  const defaultText = "Free Delivery Across India | Easy WhatsApp Ordering | 100% Baby-Safe Products";
-  // If database contains stale "above ₹999", clean it up
-  const rawText = text || defaultText;
-  const displayText = rawText.replace(/on orders above ₹?999/gi, 'Across India').replace(/above ₹?999/gi, 'Across India');
+  const defaultText = "Delivery Across PAN India | Easy WhatsApp Ordering | 100% Baby-Safe Products";
+  const rawText = (text && text.trim()) || defaultText;
+
+  // Fully normalize any variants of "Free shipping" or "Free delivery" to "Delivery Across PAN India"
+  const displayText = rawText
+    .replace(/free\s+shipping\s+across\s+(pan\s+)?india/gi, 'Delivery Across PAN India')
+    .replace(/free\s+delivery\s+across\s+(pan\s+)?india/gi, 'Delivery Across PAN India')
+    .replace(/free\s+shipping/gi, 'Delivery')
+    .replace(/free\s+delivery/gi, 'Delivery')
+    .replace(/on\s+orders\s+above\s+₹?\d+/gi, 'Across PAN India')
+    .replace(/above\s+₹?\d+/gi, 'Across PAN India')
+    .replace(/across\s+india/gi, 'Across PAN India');
 
   return (
     <aside aria-label="Announcement" className="w-full bg-[#E1F0FA] text-[#334155] border-b border-[#D0E6F5] text-xs py-1.5 sm:py-2 px-3 sm:px-8 overflow-hidden select-none">

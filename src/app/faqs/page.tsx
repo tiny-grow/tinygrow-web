@@ -53,13 +53,13 @@ const FAQS: FaqItem[] = [
     category: 'Shipping & Returns',
     question: 'What are your delivery charges and shipping times?',
     answer:
-      'We offer FREE Shipping across India on all orders. Metro orders typically arrive in 2–4 business days, and other cities within 3–6 business days.',
+      'We provide Delivery Across PAN India on all orders. Metro orders typically arrive in 2–4 business days, and other cities within 3–6 business days.',
   },
   {
     category: 'Shipping & Returns',
-    question: 'What is your return policy if the item doesn’t fit?',
+    question: 'What is your return policy if the item doesn’t fit or has an issue?',
     answer:
-      'We offer an easy 7-day hassle-free return and size exchange policy for unworn, tagged items. Simply message our WhatsApp team, and we will coordinate a reverse pickup from your doorstep.',
+      'We offer a simple 24-hour return request policy. Please share your return request along with a 360° uncut box opening video within 24 hours of delivery with our WhatsApp team, and we will assist you promptly.',
   },
 ];
 

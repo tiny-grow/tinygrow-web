@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, AlertCircle, Check, Loader2 } from 'lucide-react';
-import { InstagramIcon, FacebookIcon, PinterestIcon, YoutubeIcon } from '@/components/SocialIcons';
+import { InstagramIcon, FacebookIcon } from '@/components/SocialIcons';
 import { SocialLink } from '@/lib/supabase/types';
 import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
 
@@ -14,8 +14,6 @@ export default function AdminSocialPage() {
 
   const [instagram, setInstagram] = useState('');
   const [facebook, setFacebook] = useState('');
-  const [pinterest, setPinterest] = useState('');
-  const [youtube, setYoutube] = useState('');
 
   const fetchSocials = async () => {
     setLoading(true);
@@ -36,8 +34,6 @@ export default function AdminSocialPage() {
           const platform = l.platform.toLowerCase();
           if (platform === 'instagram') setInstagram(l.url);
           else if (platform === 'facebook') setFacebook(l.url);
-          else if (platform === 'pinterest') setPinterest(l.url);
-          else if (platform === 'youtube') setYoutube(l.url);
         });
       }
     } catch (err: unknown) {
@@ -68,8 +64,6 @@ export default function AdminSocialPage() {
       const platforms = [
         { platform: 'instagram', url: instagram.trim(), display_order: 1 },
         { platform: 'facebook', url: facebook.trim(), display_order: 2 },
-        { platform: 'pinterest', url: pinterest.trim(), display_order: 3 },
-        { platform: 'youtube', url: youtube.trim(), display_order: 4 },
       ].filter((p) => Boolean(p.url));
 
       // Upsert or clear and insert active links
@@ -151,38 +145,6 @@ export default function AdminSocialPage() {
                 className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 pl-10 border border-slate-200 focus:outline-none focus:border-[#38BDF8]"
               />
               <FacebookIcon className="w-4 h-4 text-blue-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Pinterest Profile URL
-            </label>
-            <div className="relative">
-              <input
-                type="url"
-                value={pinterest}
-                onChange={(e) => setPinterest(e.target.value)}
-                placeholder="https://pinterest.com/tinygrow"
-                className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 pl-10 border border-slate-200 focus:outline-none focus:border-red-400"
-              />
-              <span className="text-red-500 font-bold text-xs absolute left-3.5 top-1/2 -translate-y-1/2">P</span>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-              YouTube Channel URL
-            </label>
-            <div className="relative">
-              <input
-                type="url"
-                value={youtube}
-                onChange={(e) => setYoutube(e.target.value)}
-                placeholder="https://youtube.com/@tinygrow"
-                className="w-full bg-slate-50 text-xs sm:text-sm text-slate-900 rounded-xl p-2.5 pl-10 border border-slate-200 focus:outline-none focus:border-red-500"
-              />
-              <YoutubeIcon className="w-4 h-4 text-red-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
             </div>
           </div>
 

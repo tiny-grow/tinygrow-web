@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Product } from '@/lib/supabase/types';
 import ProductCard from './ProductCard';
 
@@ -10,19 +10,14 @@ interface NewArrivalsProps {
 
 export default function NewArrivals({ products, whatsappNumber }: NewArrivalsProps) {
   return (
-    <section className="px-6 sm:px-10 lg:px-12 py-8 bg-white">
+    <section className="px-4 sm:px-10 lg:px-12 py-8 bg-white">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
           <Link href="/new-arrivals" className="group">
-            <div className="flex items-center gap-2">
-              <span className="text-[#FB7185] flex items-center justify-center">
-                <Heart className="w-5 h-5 fill-[#FB7185] stroke-[#FB7185]" />
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight group-hover:text-[#FB7185] transition-colors">
-                New Arrivals
-              </h2>
-            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight group-hover:text-[#FB7185] transition-colors">
+              New Arrivals
+            </h2>
             <p className="text-xs sm:text-sm text-[#64748B] mt-1">
               Handpicked favourites for your little ones
             </p>
@@ -40,13 +35,14 @@ export default function NewArrivals({ products, whatsappNumber }: NewArrivalsPro
         {/* Product Grid / Empty State */}
         {products && products.length > 0 ? (
           <>
-            {/* Mobile: 3-col grid showing 6 products */}
-            <div className="grid grid-cols-3 gap-3 sm:hidden">
+            {/* Mobile: 2-col grid showing bigger cards */}
+            <div className="grid grid-cols-2 gap-3.5 sm:hidden">
               {products.slice(0, 6).map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
                   whatsappNumber={whatsappNumber}
+                  hideWishlist={true}
                 />
               ))}
             </div>
@@ -57,6 +53,7 @@ export default function NewArrivals({ products, whatsappNumber }: NewArrivalsPro
                   key={product.id}
                   product={product}
                   whatsappNumber={whatsappNumber}
+                  hideWishlist={true}
                 />
               ))}
             </div>

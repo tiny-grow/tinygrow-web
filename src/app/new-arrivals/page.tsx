@@ -83,6 +83,7 @@ export default async function NewArrivalsPage() {
                   key={product.id}
                   product={product}
                   whatsappNumber={contactInfo?.whatsapp_number}
+                  hideWishlist={true}
                 />
               ))}
             </div>

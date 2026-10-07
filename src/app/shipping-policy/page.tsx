@@ -35,7 +35,7 @@ export default async function ShippingPolicyPage() {
               Shipping &amp; Delivery Policy
             </h1>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              We know how exciting it is to receive baby essentials. Here is all you need to know about our fast, sanitized shipping across India.
+              We know how exciting it is to receive baby essentials. Here is all you need to know about our fast, sanitized delivery across PAN India.
             </p>
           </div>
 
@@ -43,8 +43,8 @@ export default async function ShippingPolicyPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
             <div className="p-4 rounded-2xl bg-[#ECFDF5] border border-emerald-100 flex flex-col items-center text-center">
               <PackageCheck className="w-6 h-6 text-emerald-600 mb-2" />
-              <h2 className="text-sm font-bold text-slate-900 mb-1">Free Delivery</h2>
-              <p className="text-xs text-slate-600">On all orders anywhere across India.</p>
+              <h2 className="text-sm font-bold text-slate-900 mb-1">Delivery Across PAN India</h2>
+              <p className="text-xs text-slate-600">On all orders anywhere across PAN India.</p>
             </div>
             <div className="p-4 rounded-2xl bg-[#F0F9FF] border border-sky-100 flex flex-col items-center text-center">
               <Clock className="w-6 h-6 text-[#0284C7] mb-2" />
@@ -63,7 +63,7 @@ export default async function ShippingPolicyPage() {
             <section>
               <h2 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-3 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
-                1. Shipping Rates &amp; Free Delivery
+                1. Delivery Across PAN India Rates
               </h2>
               <div className="overflow-x-auto border border-slate-200 rounded-xl">
                 <table className="w-full text-left text-xs sm:text-sm min-w-[420px]">

@@ -9,9 +9,10 @@ import { Product } from '@/lib/supabase/types';
 interface ProductCardProps {
   product: Product;
   whatsappNumber?: string | null;
+  hideWishlist?: boolean;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, hideWishlist = false }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   return (
@@ -40,23 +41,25 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Wishlist Button */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            setIsWishlisted(!isWishlisted);
-          }}
-          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-slate-500 hover:text-[#FB7185] shadow-xs transition-colors"
-          aria-label="Save to wishlist"
-        >
-          <Heart
-            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
-              isWishlisted
-                ? 'fill-[#FB7185] text-[#FB7185]'
-                : 'text-slate-500 hover:text-[#FB7185]'
-            }`}
-          />
-        </button>
+        {!hideWishlist && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              setIsWishlisted(!isWishlisted);
+            }}
+            className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-slate-500 hover:text-[#FB7185] shadow-xs transition-colors"
+            aria-label="Save to wishlist"
+          >
+            <Heart
+              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
+                isWishlisted
+                  ? 'fill-[#FB7185] text-[#FB7185]'
+                  : 'text-slate-500 hover:text-[#FB7185]'
+              }`}
+            />
+          </button>
+        )}
       </div>
 
       {/* Product Details - Perfectly aligned */}
