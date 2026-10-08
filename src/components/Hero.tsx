@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { HeroBanner } from '@/lib/supabase/types';
+import { getOptimizedImageUrl } from '@/lib/imageOptimization';
 
 interface HeroProps {
   banner?: HeroBanner | null;
@@ -149,10 +150,11 @@ export default function Hero({ banner }: HeroProps) {
                 }`}
               >
                 <Image
-                  src={imgUrl}
+                  src={getOptimizedImageUrl(imgUrl, { width: 1920 })}
                   alt={`${fullTitle} - Banner ${idx + 1}`}
                   fill
                   priority={idx === 0}
+                  fetchPriority={idx === 0 ? 'high' : 'auto'}
                   unoptimized
                   sizes="100vw"
                   className="object-cover object-right"
@@ -336,10 +338,11 @@ export default function Hero({ banner }: HeroProps) {
                   }`}
                 >
                   <Image
-                    src={mImg}
+                    src={getOptimizedImageUrl(mImg, { width: 900 })}
                     alt={`${fullTitle} - Mobile Banner ${mIdx + 1}`}
                     fill
                     priority={mIdx === 0}
+                    fetchPriority={mIdx === 0 ? 'high' : 'auto'}
                     unoptimized
                     sizes="100vw"
                     className="object-cover"

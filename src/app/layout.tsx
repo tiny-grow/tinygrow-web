@@ -100,6 +100,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={jakartaSans.variable} suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" sizes="any" />
         <link rel="icon" href="/tinygrow-favicon.png" type="image/png" sizes="512x512" />
         <link rel="shortcut icon" href="/tinygrow-favicon.png" type="image/png" />

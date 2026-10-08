@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { AboutSection } from '@/lib/supabase/types';
+import { getOptimizedImageUrl } from '@/lib/imageOptimization';
 
 interface TinyEssentialsProps {
   about?: AboutSection | null;
@@ -37,7 +38,7 @@ export default function TinyEssentials({ about }: TinyEssentialsProps) {
           {/* Desktop Background Photo across full card shifted slightly right */}
           <div className="hidden md:block absolute inset-y-0 left-0 w-[114%] sm:w-[120%] lg:w-[125%] h-full z-0 overflow-hidden pointer-events-none">
             <Image
-              src={imageUrl}
+              src={getOptimizedImageUrl(imageUrl, { width: 1200 })}
               alt={fullTitle}
               fill
               priority
@@ -87,7 +88,7 @@ export default function TinyEssentials({ about }: TinyEssentialsProps) {
           <div className="w-full px-5 py-2 md:hidden z-10">
             <div className="relative w-full h-48 sm:h-56 rounded-2xl overflow-hidden shadow-xs border border-orange-100/50">
               <Image
-                src={imageUrl}
+                src={getOptimizedImageUrl(imageUrl, { width: 800 })}
                 alt={fullTitle}
                 fill
                 priority
