@@ -5,29 +5,43 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Product } from '@/lib/supabase/types';
+import { getOptimizedImageUrl } from '@/lib/imageOptimization';
 
 interface ProductCardProps {
   product: Product;
   whatsappNumber?: string | null;
   hideWishlist?: boolean;
+  priority?: boolean;
 }
 
-export default function ProductCard({ product, hideWishlist = false }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  hideWishlist = false,
+  priority = false,
+}: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <div className="group flex flex-col h-full bg-white rounded-2xl border border-slate-100/90 p-2 sm:p-3 hover:shadow-md hover:border-pink-100 transition-all duration-200">
       {/* Image Container */}
       <div className="relative aspect-square w-full bg-[#FAF5F2] rounded-xl overflow-hidden mb-2">
         {product.image_url ? (
-          <Link href={`/product/${product.slug}`} className="block w-full h-full">
+          <Link href={`/product/${product.slug}`} className="block w-full h-full relative">
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-100 via-pink-50/40 to-slate-100 animate-pulse z-0" />
+            )}
             <Image
-              src={product.image_url}
+              src={getOptimizedImageUrl(product.image_url, { width: 500 })}
               alt={product.name}
               fill
+              priority={priority}
               unoptimized
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              onLoad={() => setImageLoaded(true)}
+              className={`object-cover group-hover:scale-105 transition-all duration-300 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
             />
           </Link>
         ) : (

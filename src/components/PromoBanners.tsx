@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { Promotion } from '@/lib/supabase/types';
+import { getOptimizedImageUrl } from '@/lib/imageOptimization';
 
 interface PromoBannersProps {
   promotions?: Promotion[];
@@ -42,7 +43,7 @@ export default function PromoBanners({ promotions = [] }: PromoBannersProps) {
           {/* Full image card shifted to the left: cardigan/flowers on the left */}
           <div className="absolute inset-y-0 -left-[12%] sm:-left-[20%] lg:-left-[26%] w-[130%] sm:w-[142%] lg:w-[152%] h-full z-0 pointer-events-none">
             <Image
-              src={specialOffersImage}
+              src={getOptimizedImageUrl(specialOffersImage, { width: 900 })}
               alt={specialOffersPromo?.title || 'Special Offers'}
               fill
               priority
@@ -85,7 +86,7 @@ export default function PromoBanners({ promotions = [] }: PromoBannersProps) {
           {/* Full image card with baby on the right */}
           <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
             <Image
-              src={comfortImage}
+              src={getOptimizedImageUrl(comfortImage, { width: 900 })}
               alt={comfortPromo?.title || 'Comfort Today'}
               fill
               priority

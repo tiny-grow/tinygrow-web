@@ -177,8 +177,8 @@ function LoginForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField(null)}
-                  placeholder="admin@tinygrow.com"
-                  className="relative z-10 w-full bg-transparent text-white text-sm py-3.5 pl-11 pr-4 placeholder-slate-600 focus:outline-none"
+                  placeholder="Input your email"
+                  className="relative z-10 w-full bg-transparent text-white text-sm py-3.5 pl-11 pr-4 placeholder-slate-500 focus:outline-none"
                 />
               </div>
             </div>

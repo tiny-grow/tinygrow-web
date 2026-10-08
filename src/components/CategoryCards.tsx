@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { Category } from '@/lib/supabase/types';
+import { getOptimizedImageUrl } from '@/lib/imageOptimization';
 
 interface CategoryCardsProps {
   categories: Category[];
@@ -202,9 +203,10 @@ export default function CategoryCards({ categories }: CategoryCardsProps) {
                     {cat.image_url ? (
                       <div className="absolute inset-y-0 -left-[4%] sm:-left-[6%] lg:-left-[8%] w-[114%] sm:w-[118%] lg:w-[122%] h-full z-0 overflow-hidden pointer-events-none">
                         <Image
-                          src={cat.image_url}
+                          src={getOptimizedImageUrl(cat.image_url, { width: 450 })}
                           alt={cat.name}
                           fill
+                          priority={idx < 4}
                           unoptimized
                           sizes="(max-width: 640px) 140vw, (max-width: 1024px) 70vw, 45vw"
                           className="object-cover object-left transition-transform duration-500 group-hover:scale-105"

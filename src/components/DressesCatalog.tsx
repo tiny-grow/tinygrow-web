@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Product, ContactInformation } from '@/lib/supabase/types';
 import { matchesSearchSpelling } from '@/lib/searchUtils';
+import { getOptimizedImageUrl } from '@/lib/imageOptimization';
 
 interface DressesCatalogProps {
   initialProducts?: Product[];
@@ -549,7 +550,7 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
           {/* Real Products Grid from Supabase (5 Columns on Desktop) */}
           {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
-              {filteredProducts.map((product) => {
+              {filteredProducts.map((product, idx) => {
                 const isWish = !!wishlist[product.id];
                 const priceNum = Number(product.price) || 0;
 
@@ -562,9 +563,10 @@ export default function DressesCatalog({ initialProducts = [], contact }: Dresse
                     <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-[#FAF9F7] mb-2.5">
                       {product.image_url ? (
                         <Image
-                          src={product.image_url}
+                          src={getOptimizedImageUrl(product.image_url, { width: 500 })}
                           alt={product.name}
                           fill
+                          priority={idx < 5}
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
                           className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         />
