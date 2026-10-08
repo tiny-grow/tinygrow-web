@@ -12,6 +12,7 @@ import {
   getContactInformation,
   getSocialLinks,
 } from '@/lib/supabase/queries';
+import { getOptimizedImageUrl } from '@/lib/imageOptimization';
 
 export const revalidate = 0;
 
@@ -123,7 +124,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-[#FAF5F2] border border-slate-100 flex items-center justify-center">
                 {product.image_url ? (
                   <Image
-                    src={product.image_url}
+                    src={getOptimizedImageUrl(product.image_url, { width: 900 })}
                     alt={product.name}
                     fill
                     priority

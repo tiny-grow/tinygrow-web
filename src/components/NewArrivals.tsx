@@ -37,23 +37,25 @@ export default function NewArrivals({ products, whatsappNumber }: NewArrivalsPro
           <>
             {/* Mobile: 2-col grid showing bigger cards */}
             <div className="grid grid-cols-2 gap-3.5 sm:hidden">
-              {products.slice(0, 6).map((product) => (
+              {products.slice(0, 6).map((product, idx) => (
                 <ProductCard
                   key={product.id}
                   product={product}
                   whatsappNumber={whatsappNumber}
                   hideWishlist={true}
+                  priority={idx < 4}
                 />
               ))}
             </div>
             {/* sm+: original 4-5 col grid showing 5 products */}
             <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
-              {products.slice(0, 5).map((product) => (
+              {products.slice(0, 5).map((product, idx) => (
                 <ProductCard
                   key={product.id}
                   product={product}
                   whatsappNumber={whatsappNumber}
                   hideWishlist={true}
+                  priority={idx < 4}
                 />
               ))}
             </div>
